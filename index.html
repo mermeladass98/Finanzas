@@ -45,13 +45,14 @@ ul { padding: 0; list-style: none; }
 .f-brick-claro { color: #F2A28E; }
 
 /* Pestañas */
-.f-tabs { background: #E4EBE5; border-radius: 12px; padding: 4px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
-.f-tab { color: #4A6357; font-weight: 500; border-radius: 8px; padding: 8px 0; font-size: 0.72rem; }
+.f-tabs { background: #E4EBE5; border-radius: 12px; padding: 4px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.f-tab { color: #4A6357; font-weight: 500; border-radius: 8px; padding: 6px 2px; font-size: 0.7rem; line-height: 1.2; display: flex; align-items: center; justify-content: center; text-align: center; }
 .f-tab-activo { background: #0B3B2C; color: #EAF4EE; font-weight: 600; }
 .f-tab:focus-visible { outline: 2px solid #0B3B2C; }
 
 /* Hero */
-.f-hero { background: #0B3B2C; color: #EAF4EE; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(11,59,44,0.25); }
+.f-hero { background: linear-gradient(160deg, #10503C 0%, #0B3B2C 55%, #072A20 100%); color: #EAF4EE; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(11,59,44,0.25); position: relative; overflow: hidden; }
+.f-marca { position: absolute; right: -6px; bottom: -30px; font-size: 7rem; font-weight: 700; color: rgba(69,230,160,0.09); font-family: 'IBM Plex Mono', monospace; pointer-events: none; }
 .f-cifra { font-size: 2.2rem; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
 .f-cifra-media { font-size: 1.6rem; font-weight: 600; }
 .f-tasa { font-size: 0.8rem; color: #9FC4B2; }
@@ -105,6 +106,7 @@ ul { padding: 0; list-style: none; }
 .f-navbtn { color: #4A6357; padding: 6px; border-radius: 8px; display: inline-flex; }
 .f-navbtn:hover { background: #E4EBE5; }
 .f-navbtn:focus-visible { outline: 2px solid #0B3B2C; }
+.f-nav-on { background: #E4EBE5; }
 .f-link { color: #0B3B2C; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; font-size: 0.85rem; }
 .f-despl { width: 100%; text-align: left; }
 
@@ -129,6 +131,7 @@ ul { padding: 0; list-style: none; }
 .f-card-rojo { border-color: #E5C0B8; }
 .f-card-rojo .f-titulo-card { color: #B0442F; }
 .f-sep { border-top: 1px solid #EDF1EC; margin-top: 8px; padding-top: 8px; }
+.f-aviso-copia { background: #FDF3E7; border-color: #EAD9B8; }
 
 /* ── Modo oscuro ── */
 body.oscuro { background: #0D1411; color: #E4EDE7; }
@@ -147,6 +150,7 @@ body.oscuro { background: #0D1411; color: #E4EDE7; }
 .oscuro .f-btn-deshabilitado { background: #243029; color: #5E7268; }
 .oscuro .f-navbtn { color: #8FA79A; }
 .oscuro .f-navbtn:hover { background: #1B2620; }
+.oscuro .f-nav-on { background: #1B2620; }
 .oscuro .f-eyebrow, .oscuro .f-label, .oscuro .f-suave { color: #8FA79A; }
 .oscuro .f-verde, .oscuro .f-link { color: #45E6A0; }
 .oscuro .f-barra-fondo { background: #243029; }
@@ -155,6 +159,7 @@ body.oscuro { background: #0D1411; color: #E4EDE7; }
 .oscuro .f-divisor > * + * { border-color: #243029; }
 .oscuro .f-sep { border-top-color: #243029; }
 .oscuro .f-item-destacado { background: #2C2413; }
+.oscuro .f-aviso-copia { background: #2C2413; border-color: #4A3B1C; }
 .oscuro .f-alerta { background: #33170F; border-color: #5E2E20; color: #F2A28E; }
 .oscuro .f-hero { box-shadow: none; border: 1px solid #1E3A2E; }
 
@@ -177,6 +182,8 @@ svg { display: block; }
 const STORAGE_KEY = "finanzas:v1";
 const CATS_GASTO = ["Alimentación", "Transporte", "Ocio", "Salud", "Deporte", "Niños", "Compras", "Regalos", "Otros"];
 const CATS_INGRESO = ["Nómina extra", "Venta", "Devolución", "Otros"];
+const EMO = { "Alimentación": "🛒", "Transporte": "⛽", "Ocio": "🎉", "Salud": "💊", "Deporte": "🏓", "Niños": "🧒", "Compras": "🛍️", "Regalos": "🎁", "Otros": "📦", "Nómina": "💼", "Paro": "🏛️", "Nómina extra": "💶", "Venta": "🏷️", "Devolución": "↩️" };
+const emo = (c) => (EMO[c] ? EMO[c] + " " : "");
 const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 const MC = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
 const PERIODOS = [{ v: 3, label: "Trimestral" }, { v: 6, label: "Semestral" }, { v: 12, label: "Anual" }];
@@ -189,8 +196,8 @@ const SS_EST = 0.065; // estimación cotización trabajador si no se indica
 const SS_EST_PARO = 0.047; // estimación cotización descontada en la prestación de paro
 
 const DEFAULT_DATA = {
-  transactions: [], config: { objetivoPct: 20, objetivoModo: "excedente", objetivoPctExc: 50, saldoAhorro: null, tema: "claro", renta: { hijos: 0, hijosMenores3: 0, compartidos: true, planPensiones: 0, ccaa: "cat" } },
-  ingresosFijos: [], gastosFijos: [], deudas: [], inversiones: [], anuales: [],
+  transactions: [], config: { objetivoPct: 20, objetivoModo: "excedente", objetivoPctExc: 50, saldoAhorro: null, tema: "claro", ultimaCopia: null, nombre: null, renta: { hijos: 0, hijosMenores3: 0, compartidos: true, planPensiones: 0, ccaa: "cat" } },
+  ingresosFijos: [], gastosFijos: [], deudas: [], inversiones: [], anuales: [], metas: [],
 };
 
 // ── Almacenamiento: window.storage (Claude) o localStorage (navegador) ──
@@ -259,6 +266,8 @@ let ui = {
   movAbierto: false,
   confirmReset: false,
   editandoSaldo: false,
+  splash: true,
+  subMes: "dia",
 };
 
 async function persist() {
@@ -393,6 +402,22 @@ const SECCIONES = {
     destacar: (i) => infoAnual(i).hasta <= 1,
     pie: "La provisión (importe ÷ meses del periodo) se descuenta cada mes en tu resumen. En trimestrales o semestrales, elige cualquiera de los meses en que toca pagar: el resto se calculan solos.",
   },
+  metas: {
+    titulo: "🎯 Mis objetivos", signo: "", importeKey: "importe", acento: "#3E6FB0",
+    campos: [
+      { key: "nombre", label: "Qué quieres", tipo: "text", ph: "Casa, coche, viaje…" },
+      { key: "tipoMeta", label: "Tipo", tipo: "opciones", opciones: ["🏠 Vivienda", "🚗 Coche", "🎁 Regalo", "⭐ Otro"] },
+      { key: "importe", label: "Importe a juntar €", tipo: "importe" },
+      { key: "anios", label: "En cuántos años", tipo: "numero", ph: "3" },
+      { key: "pareja", label: "¿En pareja?", tipo: "check" },
+    ],
+    secundaria: (i) => {
+      const meses = Math.max(Math.round((i.anios || 1) * 12), 1);
+      const cuota = i.importe / meses;
+      return (i.tipoMeta || "") + " · " + (i.anios || 1) + " años · ahorrar " + fmtEur(cuota) + "/mes" + (i.pareja ? " entre dos → " + fmtEur(cuota / 2) + " cada uno" : "");
+    },
+    pie: "Para una vivienda no apuntes el precio entero: apunta ~30% (20% de entrada + ~10% de gastos e impuestos). Ej.: casa de 250.000 € → meta de 75.000 €. En 4 años son 1.563 €/mes, o 781 € cada uno en pareja.",
+  },
 };
 
 // ── Render ──────────────────────────────────────────────────────────
@@ -403,22 +428,58 @@ function render() {
     app.innerHTML = '<div class="contenedor fila centro" style="min-height:60vh"><p class="f-eyebrow">Cargando tus cuentas…</p></div>';
     return;
   }
+  if (ui.splash) { app.innerHTML = splashHTML(); return; }
   const C = calc();
   app.innerHTML =
     '<div class="contenedor">' +
     cabeceraHTML() +
     (ui.errorGuardado ? '<div class="f-alerta">No se pudo guardar el último cambio. Los datos siguen en pantalla: reintenta con la próxima acción.</div>' : "") +
     tabsHTML() +
-    (ui.tab === "resumen" ? tabResumen() : ui.tab === "mes" ? tabMes(C) : ui.tab === "fijos" ? tabFijos(C) : ui.tab === "anuales" ? tabAnuales(C) : tabRenta()) +
-    backupHTML() +
+    (ui.tab === "resumen" ? tabResumen() : ui.tab === "mes" ? tabMesWrap(C) : ui.tab === "anuales" ? tabAnuales(C) : ui.tab === "renta" ? tabRenta() : ui.tab === "inversion" ? tabInversion() : tabInfo()) +
     '<p class="f-suave peq centrado mt6">Tus datos se guardan automáticamente en este dispositivo.</p>' +
     "</div>";
+  if (ui.tab === "inversion") recalcInv();
 }
+
+const FRASES = ["¿Le echamos un ojo a tus finanzas?", "¿Vemos cómo va el mes?", "Tu dinero te estaba esperando 😄", "Un vistazo rápido y a seguir con el día.", "Las cuentas claras y el café caliente ☕", "¿Repasamos los números un minuto?", "Hoy también se ahorra un poquito 💪"];
+const BOTONES = ["Vamos a ello 💪", "Manos a la obra 🚀", "Empezamos ✨", "Adelante 👉", "A por ello 🔥", "Dentro 🎯"];
+function splashHTML() {
+  const hoy = new Date(), hh = hoy.getHours();
+  const saludo = hh < 7 ? "Buenas noches" : hh < 13 ? "Buenos días" : hh < 21 ? "Buenas tardes" : "Buenas noches";
+  const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+  const boton = BOTONES[Math.floor(Math.random() * BOTONES.length)];
+  if (!data.config.nombre) {
+    return '<div class="contenedor fila centro" style="min-height:92vh"><section class="f-hero" style="width:100%"><span class="f-marca">€</span>' +
+      '<p class="f-eyebrow-claro mb2">💚 Mis finanzas</p>' +
+      '<p style="font-size:1.6rem;font-weight:700">¡Hola! 👋</p>' +
+      '<p class="f-tasa mt2" style="font-size:0.9rem">Soy tu app de finanzas: apuntas lo que cobras y gastas, y yo te digo cuánto ahorrar, te preparo la hucha para los pagos grandes y hasta te estimo la renta. Todo se guarda solo en tu móvil.</p>' +
+      '<label class="f-label mt3" style="color:#9FC4B2;display:block;margin-top:16px">¿Cómo te llamas?</label>' +
+      '<input id="nomInput" class="f-input-oscuro f-mono" style="width:100%;padding:10px 12px;font-size:1rem" type="text" placeholder="Tu nombre" autofocus onkeydown="if(event.key===\'Enter\')guardarNombre()">' +
+      '<button class="f-btn f-btn-sm mt3" style="background:#45E6A0;color:#0B3B2C;width:100%;font-weight:700;margin-top:14px" onclick="guardarNombre()">Empezar ✨</button></section></div>';
+  }
+  return '<div class="contenedor fila centro" style="min-height:92vh"><section class="f-hero centrado" style="width:100%"><span class="f-marca">€</span>' +
+    '<p style="font-size:2.6rem">💚</p>' +
+    '<p style="font-size:1.5rem;font-weight:700">' + saludo + ", " + esc(data.config.nombre) + " 👋</p>" +
+    '<p class="f-tasa mt2" style="font-size:0.95rem">' + frase + "</p>" +
+    '<button class="f-btn f-btn-sm mt4" style="background:#45E6A0;color:#0B3B2C;width:100%;font-weight:700;margin-top:18px" onclick="entrarApp()">' + boton + "</button></section></div>";
+}
+function guardarNombre() {
+  const el = document.getElementById("nomInput");
+  const v = el.value.trim();
+  if (!v) { el.classList.add("f-input-error"); el.focus(); return; }
+  data.config.nombre = v;
+  persist();
+  ui.splash = false;
+  render();
+}
+function entrarApp() { ui.splash = false; render(); }
 
 function cabeceraHTML() {
   const osc = data.config.tema === "oscuro";
-  return '<div class="fila entre mb2"><span class="f-eyebrow">💚 Mis finanzas</span>' +
-    '<button class="f-navbtn" style="font-size:1.05rem" onclick="toggleTema()" aria-label="Cambiar entre modo claro y oscuro">' + (osc ? "☀️" : "🌙") + "</button></div>";
+  return '<div class="fila entre mb2"><button class="f-eyebrow" style="letter-spacing:0.12em" onclick="setTab(\'resumen\')" aria-label="Ir al resumen">💚 Mis finanzas</button>' +
+    '<div class="fila gap1">' +
+    '<button class="f-navbtn' + (ui.tab === "info" ? " f-nav-on" : "") + '" style="font-size:1.05rem" onclick="setTab(\'info\')" aria-label="Información">ℹ️</button>' +
+    '<button class="f-navbtn" style="font-size:1.05rem" onclick="toggleTema()" aria-label="Cambiar entre modo claro y oscuro">' + (osc ? "☀️" : "🌙") + "</button></div></div>";
 }
 function toggleTema() {
   data.config.tema = data.config.tema === "oscuro" ? "claro" : "oscuro";
@@ -426,7 +487,7 @@ function toggleTema() {
 }
 
 function tabsHTML() {
-  const t = [["resumen", "Resumen"], ["mes", "Mes"], ["fijos", "Fijos"], ["anuales", "Hucha"], ["renta", "Renta"]];
+  const t = [["mes", "Ingresos / gastos"], ["anuales", "Hucha"], ["inversion", "Inversión"], ["renta", "Renta"]];
   return '<nav class="f-tabs mb4">' + t.map(([k, l]) =>
     '<button class="f-tab ' + (ui.tab === k ? "f-tab-activo" : "") + '" onclick="setTab(\'' + k + '\')">' + l + "</button>"
   ).join("") + "</nav>";
@@ -452,20 +513,32 @@ function tabResumen() {
 
   // Lo ahorrado: ancla real ajustable + movimientos posteriores
   const sa = data.config.saldoAhorro;
-  let saldoReal = acumulado, desdeAjuste = null;
+  let saldoReal = acumulado, desdeAjuste = null, fijosDesc = 0, mesesNuevos = 0;
   if (sa && sa.importe != null) {
     desdeAjuste = data.transactions.filter((t) => t.date > sa.fecha).reduce((s, t) => s + (t.type === "ingreso" ? t.amount : -t.amount), 0);
-    saldoReal = sa.importe + desdeAjuste;
+    const aY = Number(sa.fecha.slice(0, 4)), aM = Number(sa.fecha.slice(5, 7)) - 1;
+    mesesNuevos = Math.max(hoy.getFullYear() * 12 + hoy.getMonth() - (aY * 12 + aM), 0);
+    fijosDesc = Math.round(C.comprometido * mesesNuevos * 100) / 100;
+    saldoReal = sa.importe + desdeAjuste - fijosDesc;
   }
-  h += '<section class="f-hero mb4"><div class="fila entre mb2"><p class="f-eyebrow-claro">💰 Lo que tienes ahorrado</p>' +
+  const horas = hoy.getHours();
+  const saludo = horas < 7 ? "Buenas noches" : horas < 13 ? "Buenos días" : horas < 21 ? "Buenas tardes" : "Buenas noches";
+  h += '<p class="f-eyebrow mb2">' + saludo + (data.config.nombre ? ", " + esc(data.config.nombre) : "") + " 👋 · " + hoy.getDate() + " de " + MESES[hoy.getMonth()] + "</p>";
+
+  const dc = diasCopia();
+  if ((dc == null && data.transactions.length) || (dc != null && dc >= 30)) {
+    h += '<section class="f-card f-aviso-copia mb4"><div class="fila entre gap2"><p class="sm">💾 ' +
+      (dc == null ? '<span class="negrita">Aún no has guardado ninguna copia de seguridad.</span> Un toque y listo, por si acaso.'
+        : '<span class="negrita">Hace ' + dc + ' días de tu última copia.</span> Toca exportar, por si acaso.') +
+      '</p><button class="f-btn f-btn-primario f-btn-sm" style="flex:0 0 auto" onclick="exportarJSON()">Exportar</button></div></section>';
+  }
+
+  h += '<section class="f-hero mb4"><span class="f-marca">€</span><div class="fila entre mb2"><p class="f-eyebrow-claro">💰 Mis ahorros</p>' +
     (ui.editandoSaldo
       ? '<span class="fila gap1"><input id="saldoInput" class="f-input-oscuro f-mono" style="width:96px" inputmode="decimal" value="' + (Math.round(saldoReal * 100) / 100).toFixed(2).replace(".", ",") + '"><span class="f-eyebrow-claro">€</span><button class="f-minibtn" onclick="guardarSaldo()" aria-label="Guardar">' + IC.okMini + "</button></span>"
       : '<button class="f-pct-chip f-mono" onclick="editarSaldo()">ajustar ' + IC.lapizMini + "</button>") +
     "</div>" +
     '<span class="f-mono f-cifra ' + (saldoReal >= 0 ? "f-mint" : "f-brick-claro") + '">' + (saldoReal >= 0 ? "+" : "−") + fmtEur(Math.abs(saldoReal)) + "</span>" +
-    (sa && sa.importe != null
-      ? '<p class="f-tasa mt1">Fijaste ' + fmtEur(sa.importe) + " el " + sa.fecha.slice(8, 10) + " " + MC[Number(sa.fecha.slice(5, 7)) - 1] + (desdeAjuste ? " · desde entonces " + (desdeAjuste >= 0 ? "+" : "−") + fmtEur(Math.abs(desdeAjuste)) + " según tus apuntes" : "") + ". Toca «ajustar» cuando quieras cuadrarlo con la realidad.</p>"
-      : '<p class="f-tasa mt1">Calculado con tus apuntes (ingresos − gastos' + (primerMes ? " desde " + nombreMes(primerMes) : "") + "). Si no coincide con lo que tienes de verdad, toca «ajustar» y pon la cifra real.</p>") +
     "</section>";
 
   // Este mes
@@ -477,15 +550,15 @@ function tabResumen() {
     frase("Ahorro del mes por ahora", C.ahorro, C.ahorro >= 0 ? "f-verde" : "") + "</div></section>";
 
   // Objetivo
-  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🎯 Tu objetivo</h2>';
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🪙 Lo que deberías ahorrar</h2>';
   if (C.ingresosMes === 0) {
     h += '<p class="sm f-suave">Aún no has apuntado ningún ingreso este mes. Añade tu nómina o paro en la pestaña Mes y te diré cuánto deberías ahorrar.</p>';
   } else {
     const falta = Math.max(C.objetivo - C.ahorro, 0);
     h += '<p class="sm">Este mes deberías ahorrar <span class="f-mono negrita">' + fmtEur(C.objetivo) + "</span>.</p>";
     h += C.ahorro >= C.objetivo
-      ? '<p class="sm f-verde negrita mt1">¡Conseguido! Vas ' + fmtEur(C.ahorro - C.objetivo) + " por encima.</p>"
-      : '<p class="sm mt1">Llevas <span class="f-mono negrita">' + fmtEur(Math.max(C.ahorro, 0)) + '</span> · te faltan <span class="f-mono negrita">' + fmtEur(falta) + "</span>.</p>";
+      ? '<p class="sm f-verde negrita mt1">🏆 ¡Conseguido! Vas ' + fmtEur(C.ahorro - C.objetivo) + " por encima.</p>"
+      : '<p class="sm mt1">💪 Llevas <span class="f-mono negrita">' + fmtEur(Math.max(C.ahorro, 0)) + '</span> · te faltan <span class="f-mono negrita">' + fmtEur(falta) + "</span>.</p>";
     const w = Math.max(Math.min(C.progresoObj || 0, 100), 0);
     h += '<div class="f-barra-fondo mt2" style="height:10px;border-radius:999px"><div class="' + (C.ahorro >= C.objetivo ? "f-barra-mint" : "f-barra") + '" style="height:10px;border-radius:999px;width:' + w + '%"></div></div>';
     h += '<p class="sm mt3">' + (C.margen >= 0
@@ -493,6 +566,9 @@ function tabResumen() {
       : 'Ojo: vas <span class="f-mono negrita f-rojo">' + fmtEur(Math.abs(C.margen)) + "</span> pasado de lo que permite tu objetivo.") + "</p>";
   }
   h += "</section>";
+
+  // Mis objetivos
+  h += listaHTML("metas");
 
   // Pagos grandes (hucha)
   if (data.anuales.length) {
@@ -513,8 +589,14 @@ function tabResumen() {
       (data.deudas.length === 1 ? " (" + esc(data.deudas[0].nombre) + ")" : "") + ".</p></section>";
   }
 
-  h += '<p class="f-suave peq centrado">El detalle vive en las otras pestañas: Mes (apuntar), Fijos (tu plan), Hucha (pagos grandes) y Renta.</p>';
   return h;
+}
+
+function tabMesWrap(C) {
+  let h = '<div class="chips mb3">' +
+    '<button class="f-chip' + (ui.subMes !== "plan" ? " f-chip-activo" : "") + '" onclick="ui.subMes=\'dia\';render()">📆 Día a día</button>' +
+    '<button class="f-chip' + (ui.subMes === "plan" ? " f-chip-activo" : "") + '" onclick="ui.subMes=\'plan\';render()">🏠 Plan fijo</button></div>';
+  return h + (ui.subMes === "plan" ? tabFijos(C) : tabMes(C));
 }
 
 // ── Pestaña Mes ──
@@ -586,7 +668,7 @@ function tabMes(C) {
       '<div class="fila gap2 mb3"><input id="mImporte" class="f-input f-mono f-input-grande" type="text" inputmode="decimal" placeholder="0,00" autofocus>' +
       '<span class="f-mono f-suave" style="font-size:1.5rem">€</span></div>' +
       '<label class="f-label">Categoría</label><div class="chips mb3">' +
-      cats.map((c) => '<button class="f-chip' + (ui.formCat === c ? " f-chip-activo" : "") + '" data-cat="' + esc(c) + '" onclick="selCat(this)">' + esc(c) + "</button>").join("") +
+      cats.map((c) => '<button class="f-chip' + (ui.formCat === c ? " f-chip-activo" : "") + '" data-cat="' + esc(c) + '" onclick="selCat(this)">' + emo(c) + esc(c) + "</button>").join("") +
       "</div>" +
       '<div class="grid2 mb3"><div><label class="f-label">Fecha</label><input id="mFecha" class="f-input" type="date" value="' + hoyISO() + '"></div>' +
       '<div><label class="f-label">Nota (opcional)</label><input id="mNota" class="f-input" type="text" placeholder="Mercadona, gasolina…"></div></div>' +
@@ -597,7 +679,7 @@ function tabMes(C) {
   if (C.porCategoria.length) {
     h += '<section class="f-card mb5"><h2 class="f-titulo-card mb3">🛒 Gastos variables por categoría</h2>';
     C.porCategoria.forEach(([cat, tot]) => {
-      h += '<div class="mb2"><div class="fila entre sm mb1" style="margin-bottom:4px"><span>' + esc(cat) + '</span><span class="f-mono">' + fmtEur(tot) + "</span></div>" +
+      h += '<div class="mb2"><div class="fila entre sm mb1" style="margin-bottom:4px"><span>' + emo(cat) + esc(cat) + '</span><span class="f-mono">' + fmtEur(tot) + "</span></div>" +
         '<div class="f-barra-fondo"><div class="f-barra" style="width:' + (tot / C.maxCat) * 100 + '%"></div></div></div>';
     });
     h += "</section>";
@@ -626,7 +708,7 @@ function tabMes(C) {
     } else {
       h += "<ul>";
       C.txMes.forEach((t) => {
-        h += '<li class="mov"><div class="crece"><p class="sm trunca">' + esc(t.category) + (t.note ? '<span class="f-suave"> · ' + esc(t.note) + "</span>" : "") + "</p>" +
+        h += '<li class="mov"><div class="crece"><p class="sm trunca">' + emo(t.category) + esc(t.category) + (t.note ? '<span class="f-suave"> · ' + esc(t.note) + "</span>" : "") + "</p>" +
           '<p class="f-suave peq f-mono">' + t.date.slice(8, 10) + " " + MC[Number(t.date.slice(5, 7)) - 1] + "</p></div>" +
           '<span class="f-mono sm ' + (t.type === "ingreso" ? "f-verde" : "") + '">' + (t.type === "ingreso" ? "+" : "−") + fmtEur(t.amount) + "</span>";
         if (ui.borrandoMov === t.id) {
@@ -794,7 +876,7 @@ function tabRenta() {
     R.noms.forEach((t) => {
       const pct = t.bruto > 0 ? ((t.irpf || 0) / t.bruto) * 100 : 0;
       h += '<li class="mov"><div class="crece"><p class="sm trunca">' + t.date.slice(8, 10) + " " + MC[Number(t.date.slice(5, 7)) - 1] +
-        ' <span class="f-suave">· ' + (t.category === "Paro" ? "paro" : "nómina") + (t.note ? " · " + esc(t.note) : "") + "</span></p>" +
+        ' <span class="f-suave">· ' + (t.category === "Paro" ? "🏛️ paro" : "💼 nómina") + (t.note ? " · " + esc(t.note) : "") + "</span></p>" +
         '<p class="f-suave peq f-mono">IRPF ' + fmtEur(t.irpf || 0) + " (" + pct.toFixed(1).replace(".", ",") + "%)</p></div>" +
         '<span class="f-mono sm">' + fmtEur(t.bruto) + "</span>";
       if (ui.borrandoMov === t.id) {
@@ -828,6 +910,143 @@ function guardarConfigRenta() {
   };
   persist();
   render();
+}
+
+// ── Pestaña Mi inversión ──
+function invCfg() {
+  const c = data.config.inversion || {};
+  const nom = (i) => (i.nombre || "").toLowerCase();
+  const planSp = data.inversiones.filter((i) => /s ?& ?p|sp ?500|500/.test(nom(i))).reduce((s, i) => s + i.importe, 0);
+  const planMu = data.inversiones.filter((i) => /mund|world|global/.test(nom(i))).reduce((s, i) => s + i.importe, 0);
+  const planTot = data.inversiones.reduce((s, i) => s + i.importe, 0);
+  const viejo = c.carteras ? null : c; // migración del formato antiguo (una sola cartera)
+  const sp = (c.carteras && c.carteras.sp) || {};
+  const mu = (c.carteras && c.carteras.mundo) || {};
+  return {
+    anios: c.anios != null ? c.anios : viejo && viejo.anios != null ? viejo.anios : 15,
+    sp: {
+      inicial: sp.inicial != null ? sp.inicial : viejo && viejo.inicial != null ? viejo.inicial : 0,
+      mensual: sp.mensual != null ? sp.mensual : viejo && viejo.mensual != null ? viejo.mensual : planSp || planTot,
+      pct: sp.pct != null ? sp.pct : viejo && viejo.pct != null ? viejo.pct : 10,
+    },
+    mundo: {
+      inicial: mu.inicial != null ? mu.inicial : 0,
+      mensual: mu.mensual != null ? mu.mensual : planMu,
+      pct: mu.pct != null ? mu.pct : 8,
+    },
+    planSp, planMu,
+  };
+}
+function fvInversion(inicial, mensual, pct, anios) {
+  const m = Math.max(Math.round(anios * 12), 1);
+  const rm = pct / 100 / 12;
+  const fv = rm === 0 ? inicial + mensual * m : inicial * Math.pow(1 + rm, m) + mensual * ((Math.pow(1 + rm, m) - 1) / rm);
+  return { fv, aportado: inicial + mensual * m };
+}
+function carteraHTML(pref, titulo, v, plan, nota) {
+  return '<section class="f-card mb4" style="border-left:4px solid #2CB57E"><h2 class="f-titulo-card mb2">' + titulo + '</h2><div class="grid2 mb2">' +
+    '<div><label class="f-label">Ya invertido €</label><input id="' + pref + 'Ini" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(v.inicial).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
+    '<div><label class="f-label">Aportación € / mes</label><input id="' + pref + 'Men" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(v.mensual).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
+    '<div><label class="f-label">Rentab. anual % <span style="text-transform:none">(' + nota + ')</span></label><input id="' + pref + 'Pct" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(v.pct).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
+    '<div style="align-self:end"><p class="f-suave peq">Dentro de <span id="' + pref + 'A">—</span> años</p><p class="f-mono negrita f-verde" id="' + pref + 'Res">—</p></div>' +
+    "</div>" + (plan > 0 ? '<p class="f-suave peq">Tu Plan fijo ya aporta ' + fmtEur(plan) + "/mes a esta cartera: la casilla viene precargada con eso.</p>" : "") + "</section>";
+}
+function tabInversion() {
+  const v = invCfg();
+  let h = '<section class="f-hero mb4"><span class="f-marca" style="opacity:.16">📈</span><p class="f-eyebrow-claro mb2">📈 Mi inversión · las dos carteras juntas</p>' +
+    '<span class="f-mono f-cifra f-mint" id="rFuturo">—</span>' +
+    '<p class="f-tasa mt1" id="rSub"></p>' +
+    '<div class="f-desglose">' +
+    '<div class="f-linea"><span class="f-eyebrow-claro">🇺🇸 S&amp;P 500</span><span class="f-mono" id="rSp">—</span></div>' +
+    '<div class="f-linea"><span class="f-eyebrow-claro">🌍 Todo el mundo</span><span class="f-mono" id="rMu">—</span></div>' +
+    '<div class="f-linea"><span class="f-eyebrow-claro">Tú habrás puesto</span><span class="f-mono" id="rAportado">—</span></div>' +
+    '<div class="f-linea"><span class="f-eyebrow-claro">Ganancia estimada</span><span class="f-mono f-mint" id="rGanancia">—</span></div>' +
+    "</div></section>";
+
+  h += '<section class="f-card mb4"><div class="fila entre"><h2 class="f-titulo-card">⏳ Horizonte</h2>' +
+    '<div class="fila gap2"><input id="iAnios" class="f-input f-mono" style="width:72px;text-align:center" type="text" inputmode="numeric" value="' + v.anios + '" oninput="recalcInv()" onchange="guardarInv()"><span class="sm f-suave">años</span></div></div></section>';
+
+  h += carteraHTML("sp", "🇺🇸 Fondo indexado S&amp;P 500", v.sp, v.planSp, "media hist. ~10");
+  h += carteraHTML("mu", "🌍 Fondo indexado Todo el mundo", v.mundo, v.planMu, "media hist. ~8");
+
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🔮 Las dos carteras sumadas</h2><div id="invHitos"></div></section>';
+
+  h += '<p class="f-suave peq">Los % por defecto son medias históricas a muy largo plazo de los índices que siguen los fondos de Vanguard (S&amp;P 500 ≈ 10 %/año; mundial tipo FTSE All-World ≈ 8 %/año, con dividendos reinvertidos, antes de inflación y comisiones). El pasado no garantiza el futuro: habrá años de caídas fuertes. Es orientación, no asesoramiento de inversión.</p>';
+  return h;
+}
+function leerCartera(pref) {
+  return {
+    inicial: parseNum(document.getElementById(pref + "Ini").value),
+    mensual: parseNum(document.getElementById(pref + "Men").value),
+    pct: parseNum(document.getElementById(pref + "Pct").value),
+  };
+}
+function recalcInv() {
+  const anios = Math.max(parseNum(document.getElementById("iAnios").value), 1);
+  const sp = leerCartera("sp"), mu = leerCartera("mu");
+  const rs = fvInversion(sp.inicial, sp.mensual, sp.pct, anios);
+  const rm = fvInversion(mu.inicial, mu.mensual, mu.pct, anios);
+  const fv = rs.fv + rm.fv, ap = rs.aportado + rm.aportado;
+  document.getElementById("rFuturo").textContent = fmtEur(fv);
+  document.getElementById("rSub").textContent = "en " + anios + " años, sumando S&P 500 + Todo el mundo";
+  document.getElementById("rSp").textContent = fmtEur(rs.fv);
+  document.getElementById("rMu").textContent = fmtEur(rm.fv);
+  document.getElementById("rAportado").textContent = fmtEur(ap);
+  document.getElementById("rGanancia").textContent = "+" + fmtEur(Math.max(fv - ap, 0));
+  document.getElementById("spA").textContent = anios;
+  document.getElementById("muA").textContent = anios;
+  document.getElementById("spRes").textContent = fmtEur(rs.fv) + " (+" + fmtEur(Math.max(rs.fv - rs.aportado, 0)) + ")";
+  document.getElementById("muRes").textContent = fmtEur(rm.fv) + " (+" + fmtEur(Math.max(rm.fv - rm.aportado, 0)) + ")";
+  document.getElementById("invHitos").innerHTML = [5, 10, 15, 20, 25].map((a) => {
+    const t = fvInversion(sp.inicial, sp.mensual, sp.pct, a).fv + fvInversion(mu.inicial, mu.mensual, mu.pct, a).fv;
+    return '<div class="fila entre sm" style="margin-top:4px"><span class="f-suave">En ' + a + ' años</span><span class="f-mono negrita">' + fmtEur(t) + "</span></div>";
+  }).join("");
+}
+function guardarInv() {
+  data.config.inversion = {
+    anios: Math.max(parseNum(document.getElementById("iAnios").value), 1),
+    carteras: { sp: leerCartera("sp"), mundo: leerCartera("mu") },
+  };
+  persist();
+}
+
+// ── Pestaña Información ──
+function tabInfo() {
+  const guia = '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🧭 Cómo se usa la app</h2>' +
+    '<p class="sm" style="margin-top:6px"><span class="negrita">💚 Mis finanzas</span> (arriba a la izquierda): tócalo y vuelves siempre al Resumen — tus ahorros, cómo va el mes, lo que deberías ahorrar y tus objetivos.</p>' +
+    '<p class="sm" style="margin-top:6px"><span class="negrita">ℹ️</span> abre esta pantalla · <span class="negrita">🌙/☀️</span> cambia entre modo claro y oscuro.</p>' +
+    '<p class="sm" style="margin-top:6px"><span class="negrita">💶 Ingresos / gastos:</span> el día a día — nóminas y paro (alimentan la Renta), gastos e ingresos extra, con las flechas ‹ › para cambiar de mes. Y dentro, en «🏠 Plan fijo», tus ingresos fijos, gastos fijos, deudas e inversiones automáticas.</p>' +
+    '<p class="sm" style="margin-top:6px"><span class="negrita">🐷 Hucha:</span> los pagos que llegan de golpe (seguro del coche, Navidad, viajes…). La app te dice cuánto apartar cada mes para tenerlos listos.</p>' +
+    '<p class="sm" style="margin-top:6px"><span class="negrita">📈 Inversión:</span> cuánto podrían crecer tus fondos con el interés compuesto, cartera por cartera y sumadas.</p>' +
+    '<p class="sm" style="margin-top:6px"><span class="negrita">🧾 Renta:</span> con el bruto y el IRPF de tus nóminas estima si la declaración saldrá a pagar o a devolver, con meses de adelanto.</p></section>';
+  let h = guia + '<section class="f-card mb4" style="border-left:4px solid #3E6FB0"><h2 class="f-titulo-card mb2">🎯 Cómo funciona el objetivo de ahorro</h2>' +
+    '<p class="sm">Cada mes apuntas lo que cobras y lo que gastas. Con eso, la app te propone cuánto guardar. El <span class="negrita">porcentaje lo eliges tú</span>: es el numerito con lápiz (✎) del recuadro verde de «Ingresos / gastos». La app solo hace la cuenta: convierte tu porcentaje en euros según lo que hayas cobrado ese mes.</p>' +
+    '<p class="sm mt2"><span class="negrita">% de ingresos</span>: guardar ese trozo de todo lo cobrado. Ejemplo: cobras 1.500 € y tienes puesto el 20% → tu objetivo es 300 €.</p>' +
+    '<p class="sm mt2"><span class="negrita">% del excedente</span> (el recomendado si cada mes cobras distinto): primero se aparta lo que ya tiene dueño —fijos, deudas y hucha— y el porcentaje se aplica solo a lo que sobra. Ejemplo: cobras 1.500 €, tus fijos suman 500 € → sobran 1.000 €; con el 50% tu objetivo es 500 €. Si un mes cobras menos, el objetivo baja solo: nunca te pedirá ahorrar dinero que no te queda.</p></section>';
+
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">📖 Diccionario rápido</h2>' + [
+    ["Gasto fijo", "el que llega todos los meses sí o sí (seguro, luz, cuotas…)."],
+    ["Gasto variable", "el del día a día, que cambia cada mes (súper, gasolina, ocio…)."],
+    ["Comprometido", "fijos + cuotas de deudas + provisión de la hucha: el dinero que ya tiene dueño antes de empezar el mes."],
+    ["Excedente", "lo que queda de tus ingresos después del comprometido."],
+    ["Provisión / Hucha", "dinero que apartas cada mes para pagos grandes que llegan de vez en cuando (seguro del coche, Navidad…). La app divide el pago entre los meses que faltan para que, cuando llegue, el dinero esté listo."],
+    ["Bruto", "tu sueldo antes de que te quiten nada."],
+    ["Neto", "lo que llega al banco después de IRPF, Seguridad Social y sindicato."],
+    ["Retención (IRPF)", "el adelanto de impuestos que te quitan en cada nómina. En la declaración se ajusta: si adelantaste de más, te devuelven; si de menos, pagas."],
+    ["Base liquidable", "la cifra sobre la que Hacienda calcula de verdad tus impuestos (el bruto menos lo deducible)."],
+    ["Cuota", "el impuesto total del año que te toca según esa base."],
+    ["A devolver / a pagar", "la diferencia entre esa cuota y lo que ya te retuvieron durante el año."],
+    ["Ajustar (Mis ahorros)", "poner a mano la cifra real que tienes ahorrada. Desde ahí, la app suma lo que apuntas y descuenta tus fijos con cada mes nuevo."],
+  ].map((p) => '<p class="sm" style="margin-top:6px"><span class="negrita">' + p[0] + ":</span> " + p[1] + "</p>").join("") + "</section>";
+
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">💾 Cómo funciona la copia de seguridad</h2>' +
+    '<p class="sm">Tus datos viven <span class="negrita">solo dentro de este dispositivo</span>, no en internet. Por eso conviene entender estos tres botones:</p>' +
+    '<p class="sm mt2"><span class="negrita">Exportar</span>: descarga un archivo (finanzas-backup.json) con TODO — movimientos, plan, hucha, renta, metas y ajustes. Guárdalo de vez en cuando en Drive o similar: es tu salvavidas si pierdes el móvil o borras el navegador.</p>' +
+    '<p class="sm mt2"><span class="negrita">Importar</span>: restaura ese archivo, aquí o en otro móvil. Ojo: <span class="negrita">reemplaza</span> lo que haya, no lo mezcla.</p>' +
+    '<p class="sm mt2"><span class="negrita">Borrar todo</span>: deja la app a cero, con doble confirmación. Útil para empezar de nuevo o antes de pasarle la app a otra persona.</p></section>';
+
+  h += backupHTML();
+  return h;
 }
 
 // ── Lista editable genérica ──
@@ -868,15 +1087,20 @@ function listaHTML(sec, C) {
     const item = ui.editor.id ? items.find((i) => i.id === ui.editor.id) : null;
     h += '<div class="f-subform"><div class="grid2 mb2">';
     cfg.campos.forEach((c) => {
-      const val = item ? item[c.key] : c.tipo === "mes" ? new Date().getMonth() : c.tipo === "periodo" ? 12 : "";
+      const val = item ? item[c.key] : c.tipo === "mes" ? new Date().getMonth() : c.tipo === "periodo" ? 12 : c.tipo === "check" ? false : c.tipo === "opciones" ? c.opciones[0] : "";
       h += '<div class="' + (c.tipo === "text" ? "span2" : "") + '"><label class="f-label">' + c.label + "</label>";
       if (c.tipo === "mes") {
         h += '<select id="f_' + c.key + '" class="f-input">' + MESES.map((m, i) => '<option value="' + i + '"' + (Number(val) === i ? " selected" : "") + ">" + m + "</option>").join("") + "</select>";
       } else if (c.tipo === "periodo") {
         h += '<select id="f_' + c.key + '" class="f-input">' + PERIODOS.map((p) => '<option value="' + p.v + '"' + (Number(val) === p.v ? " selected" : "") + ">" + p.label + "</option>").join("") + "</select>";
+      } else if (c.tipo === "opciones") {
+        h += '<select id="f_' + c.key + '" class="f-input">' + c.opciones.map((o) => '<option value="' + esc(o) + '"' + (val === o ? " selected" : "") + ">" + esc(o) + "</option>").join("") + "</select>";
+      } else if (c.tipo === "check") {
+        h += '<label class="fila gap2 sm" style="margin-top:8px"><input type="checkbox" id="f_' + c.key + '"' + (val ? " checked" : "") + "> Sí, a medias</label>";
       } else {
-        const mostrado = c.tipo === "importe" && item ? String(val).replace(".", ",") : esc(val);
-        h += '<input id="f_' + c.key + '" class="f-input' + (c.tipo === "importe" ? " f-mono" : "") + '" type="text" inputmode="' + (c.tipo === "importe" ? "decimal" : "text") + '" placeholder="' + (c.ph || (c.tipo === "importe" ? "0,00" : "")) + '" value="' + mostrado + '">';
+        const esNum = c.tipo === "importe" || c.tipo === "numero";
+        const mostrado = esNum && item && val !== "" && val != null ? String(val).replace(".", ",") : esc(val);
+        h += '<input id="f_' + c.key + '" class="f-input' + (esNum ? " f-mono" : "") + '" type="text" inputmode="' + (esNum ? "decimal" : "text") + '" placeholder="' + (c.ph || (esNum ? "0,00" : "")) + '" value="' + mostrado + '">';
       }
       h += "</div>";
     });
@@ -897,8 +1121,8 @@ function listaHTML(sec, C) {
 }
 
 function backupHTML() {
-  return '<details class="backup"><summary>Copia de seguridad y reinicio</summary>' +
-    '<div class="f-card mt2"><p class="f-suave sm mb3">Exporta tus datos a un archivo JSON o restáuralos en otro dispositivo o navegador.</p>' +
+  return '<section class="f-card mb4" style="border-left:4px solid #4A6357"><h2 class="f-titulo-card mb2">💾 Copia de seguridad y reinicio</h2>' +
+    '<p class="f-suave sm mb3">Exporta tus datos a un archivo JSON o restáuralos en otro dispositivo o navegador. ' + (diasCopia() == null ? "Todavía no has hecho ninguna copia." : "Última copia: hace " + diasCopia() + (diasCopia() === 1 ? " día." : " días.")) + '</p>' +
     '<div class="fila gap2">' +
     '<button class="f-btn f-btn-secundario f-btn-sm" onclick="exportarJSON()">' + IC.descarga + " Exportar</button>" +
     '<button class="f-btn f-btn-secundario f-btn-sm" onclick="document.getElementById(\'impFile\').click()">Importar…</button>' +
@@ -909,7 +1133,7 @@ function backupHTML() {
         '<div class="fila gap2"><button class="f-btn f-btn-sm" style="background:#B0442F;color:#fff" onclick="resetTotal()">Sí, borrar todo</button>' +
         '<button class="f-chip-mini" style="padding:8px 12px" onclick="ui.confirmReset=false;render()">Cancelar</button></div>'
       : '<button class="f-link f-rojo" onclick="ui.confirmReset=true;render()">' + IC.papelera + " Borrar todos los datos (empezar de cero)</button>") +
-    "</div></div></details>";
+    "</div></section>";
 }
 
 async function resetTotal() {
@@ -917,7 +1141,7 @@ async function resetTotal() {
   const hoy = new Date();
   ui = { ...ui, tab: "resumen", y: hoy.getFullYear(), m: hoy.getMonth(), formTipo: null, formCat: "",
     editor: null, borrandoItem: null, borrandoMov: null, editandoPct: false, rentaAño: null,
-    movAbierto: false, confirmReset: false, editandoSaldo: false };
+    movAbierto: false, confirmReset: false, editandoSaldo: false, splash: true, subMes: "dia" };
   await persist();
   render();
 }
@@ -1046,8 +1270,12 @@ function guardarItem(sec) {
   const cfg = SECCIONES[sec];
   const obj = { id: ui.editor.id || uid() };
   for (const c of cfg.campos) {
-    const v = document.getElementById("f_" + c.key).value;
-    obj[c.key] = c.tipo === "importe" ? Math.round(parseNum(v) * 100) / 100 : c.tipo === "mes" || c.tipo === "periodo" ? Number(v) : String(v).trim();
+    const el = document.getElementById("f_" + c.key);
+    obj[c.key] = c.tipo === "importe" ? Math.round(parseNum(el.value) * 100) / 100
+      : c.tipo === "mes" || c.tipo === "periodo" ? Number(el.value)
+      : c.tipo === "numero" ? parseNum(el.value)
+      : c.tipo === "check" ? el.checked
+      : String(el.value).trim();
   }
   if (!obj[cfg.campos[0].key]) { document.getElementById("f_" + cfg.campos[0].key).classList.add("f-input-error"); return; }
   if (!cfg.ceroOk && obj[cfg.importeKey] <= 0) { document.getElementById("f_" + cfg.importeKey).classList.add("f-input-error"); return; }
@@ -1063,7 +1291,15 @@ function exportarCSV() {
   });
   descargar(filas.map((f) => f.join(";")).join("\n"), "movimientos.csv", "text/csv;charset=utf-8", "\ufeff");
 }
-function exportarJSON() { descargar(JSON.stringify(data, null, 2), "finanzas-backup.json", "application/json"); }
+function diasCopia() {
+  if (!data.config.ultimaCopia) return null;
+  return Math.floor((Date.now() - new Date(data.config.ultimaCopia + "T00:00:00").getTime()) / 86400000);
+}
+function exportarJSON() {
+  descargar(JSON.stringify(data, null, 2), "finanzas-backup.json", "application/json");
+  data.config.ultimaCopia = hoyISO();
+  persist(); render();
+}
 function descargar(contenido, nombre, tipo, bom) {
   const blob = new Blob([(bom || "") + contenido], { type: tipo });
   const url = URL.createObjectURL(blob);
@@ -1079,7 +1315,8 @@ function importarJSON(inp) {
       const p = JSON.parse(r.result);
       if (!p || typeof p !== "object" || !Array.isArray(p.transactions)) throw new Error("formato");
       data = { ...JSON.parse(JSON.stringify(DEFAULT_DATA)), ...p, config: { ...DEFAULT_DATA.config, ...(p.config || {}) } };
-      ["transactions", "ingresosFijos", "gastosFijos", "deudas", "inversiones", "anuales"].forEach((k) => { if (!Array.isArray(data[k])) data[k] = []; });
+      ["transactions", "ingresosFijos", "gastosFijos", "deudas", "inversiones", "anuales", "metas"].forEach((k) => { if (!Array.isArray(data[k])) data[k] = []; });
+      data.config.ultimaCopia = hoyISO();
       persist(); render();
     } catch (e) {
       ui.errorGuardado = false;
@@ -1097,7 +1334,7 @@ function importarJSON(inp) {
     if (v) {
       const p = JSON.parse(v);
       data = { ...JSON.parse(JSON.stringify(DEFAULT_DATA)), ...p, config: { ...DEFAULT_DATA.config, ...(p.config || {}) } };
-      ["transactions", "ingresosFijos", "gastosFijos", "deudas", "inversiones", "anuales"].forEach((k) => { if (!Array.isArray(data[k])) data[k] = []; });
+      ["transactions", "ingresosFijos", "gastosFijos", "deudas", "inversiones", "anuales", "metas"].forEach((k) => { if (!Array.isArray(data[k])) data[k] = []; });
     }
   } catch (e) { /* primera vez */ }
   ui.cargando = false;
