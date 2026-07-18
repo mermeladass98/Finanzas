@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B3B2C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finanzas">
+
+<title>Mis finanzas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Archivo', system-ui, sans-serif; background: #F1F4F0; color: #14231D; -webkit-font-smoothing: antialiased; }
+button { font: inherit; border: 0; background: none; padding: 0; cursor: pointer; color: inherit; }
+input, select { font: inherit; }
+h1, h2, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+
+.contenedor { max-width: 430px; margin: 0 auto; padding: 20px 16px 64px; }
+.fila { display: flex; align-items: center; }
+.entre { justify-content: space-between; }
+.centro { justify-content: center; }
+.gap1 { gap: 4px; } .gap2 { gap: 8px; } .gap3 { gap: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.span2 { grid-column: span 2; }
+.mt1 { margin-top: 4px; } .mt2 { margin-top: 8px; } .mt3 { margin-top: 12px; } .mt4 { margin-top: 16px; } .mt6 { margin-top: 24px; }
+.mb2 { margin-bottom: 8px; } .mb3 { margin-bottom: 12px; } .mb4 { margin-bottom: 16px; } .mb5 { margin-bottom: 20px; }
+.peq { font-size: 0.75rem; }
+.sm { font-size: 0.85rem; }
+.centrado { text-align: center; }
+.derecha { text-align: right; }
+.trunca { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crece { flex: 1; min-width: 0; }
+.negrita { font-weight: 600; }
+
+.f-mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+.f-suave { color: #7C8F84; }
+.f-verde { color: #1E7A55; }
+.f-mint { color: #45E6A0; }
+.f-brick-claro { color: #F2A28E; }
+
+/* Pestañas */
+.f-tabs { background: #E4EBE5; border-radius: 12px; padding: 4px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.f-tab { color: #4A6357; font-weight: 500; border-radius: 8px; padding: 8px 0; font-size: 0.72rem; }
+.f-tab-activo { background: #0B3B2C; color: #EAF4EE; font-weight: 600; }
+.f-tab:focus-visible { outline: 2px solid #0B3B2C; }
+
+/* Hero */
+.f-hero { background: #0B3B2C; color: #EAF4EE; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(11,59,44,0.25); }
+.f-cifra { font-size: 2.2rem; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; }
+.f-cifra-media { font-size: 1.6rem; font-weight: 600; }
+.f-tasa { font-size: 0.8rem; color: #9FC4B2; }
+.f-eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; color: #4A6357; text-transform: uppercase; }
+.f-eyebrow-claro { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; color: #9FC4B2; text-transform: uppercase; }
+.f-desglose { border-top: 1px solid rgba(255,255,255,0.15); padding-top: 12px; margin-top: 16px; }
+.f-linea { display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 4px; }
+
+.f-tira { height: 10px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; margin-top: 12px; }
+.f-tira > div { height: 100%; border-radius: 999px; }
+.f-tira-ahorro { background: #45E6A0; }
+.f-tira-progreso { background: #8FD9B8; }
+
+.f-caja { border-radius: 10px; padding: 8px 12px; font-size: 0.85rem; margin-top: 12px; }
+.f-caja-ok { background: rgba(69,230,160,0.12); color: #C9F3DF; }
+.f-caja-aviso { background: rgba(242,162,142,0.15); color: #F6C4B5; }
+
+.f-pct-chip { background: rgba(255,255,255,0.12); color: #EAF4EE; border-radius: 999px; padding: 2px 8px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px; }
+.f-pct-chip:focus-visible { outline: 2px solid #45E6A0; }
+.f-minibtn { color: #45E6A0; padding: 2px; display: inline-flex; }
+.f-input-oscuro { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; padding: 2px 6px; color: #EAF4EE; width: 56px; text-align: center; font-size: 0.85rem; }
+.f-input-oscuro:focus { outline: 2px solid #45E6A0; }
+.f-modo { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #9FC4B2; border-radius: 999px; padding: 3px 10px; font-size: 0.7rem; }
+.f-modo-on { background: rgba(69,230,160,0.15); border-color: #45E6A0; color: #C9F3DF; font-weight: 600; }
+.f-modo:focus-visible { outline: 2px solid #45E6A0; }
+
+/* Tarjetas */
+.f-card { background: #FFF; border: 1px solid #DDE6DF; border-radius: 16px; padding: 16px; }
+.f-titulo-card { font-size: 0.95rem; font-weight: 600; }
+.f-label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #4A6357; margin-bottom: 4px; }
+.f-input { background: #F6F8F5; border: 1px solid #D3DED6; border-radius: 10px; padding: 8px 12px; color: #14231D; width: 100%; }
+.f-input:focus { outline: 2px solid #0B3B2C; outline-offset: 1px; }
+.f-input-grande { font-size: 1.5rem; }
+.f-input-error { outline: 2px solid #B0442F; }
+.f-subform { background: #F6F8F5; border: 1px solid #E0E8E2; border-radius: 12px; padding: 12px; margin-top: 8px; }
+
+.f-chip { background: #F1F4F0; border: 1px solid #D3DED6; color: #33463C; border-radius: 999px; padding: 4px 12px; font-size: 0.85rem; }
+.f-chip:focus-visible { outline: 2px solid #0B3B2C; }
+.f-chip-activo { background: #0B3B2C; border-color: #0B3B2C; color: #EAF4EE; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.f-btn { border-radius: 12px; padding: 12px 0; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.f-btn-sm { border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; width: auto; }
+.f-btn-primario { background: #0B3B2C; color: #EAF4EE; }
+.f-btn-primario:active { transform: scale(0.98); }
+.f-btn-secundario { background: #FFF; border: 1.5px solid #0B3B2C; color: #0B3B2C; }
+.f-btn-secundario:active { transform: scale(0.98); }
+.f-btn-borrar-conf { background: #B0442F; color: #fff; font-weight: 600; border-radius: 8px; padding: 4px 8px; font-size: 0.75rem; }
+.f-chip-mini { background: #F1F4F0; border: 1px solid #D3DED6; color: #33463C; border-radius: 8px; padding: 4px 8px; font-size: 0.75rem; }
+
+.f-navbtn { color: #4A6357; padding: 6px; border-radius: 8px; display: inline-flex; }
+.f-navbtn:hover { background: #E4EBE5; }
+.f-navbtn:focus-visible { outline: 2px solid #0B3B2C; }
+.f-link { color: #0B3B2C; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; font-size: 0.85rem; }
+.f-despl { width: 100%; text-align: left; }
+
+/* Barras */
+.f-barra-fondo { background: #EDF1EC; border-radius: 999px; height: 8px; }
+.f-barra { background: #0B3B2C; border-radius: 999px; height: 8px; }
+.barras6 { display: flex; align-items: flex-end; gap: 8px; height: 96px; }
+.barras6 > div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.barra-v { width: 100%; border-radius: 4px 4px 0 0; }
+.f-barra-mint { background: #2CB57E; }
+.f-barra-brick { background: #B0442F; }
+.opaca { opacity: 0.6; }
+
+/* Filas de listas */
+.mov { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #EDF1EC; }
+.mov:first-child { border-top: 0; }
+.f-item-destacado { background: #FDF3E7; border-radius: 8px; padding-left: 8px; padding-right: 8px; margin: 0 -8px; }
+
+.f-alerta { background: #FBEAE5; border: 1px solid #E8B4A5; color: #7A2E1D; border-radius: 10px; padding: 8px 12px; font-size: 0.85rem; margin-bottom: 12px; }
+
+.f-rojo { color: #B0442F; }
+.f-card-rojo { border-color: #E5C0B8; }
+.f-card-rojo .f-titulo-card { color: #B0442F; }
+.f-sep { border-top: 1px solid #EDF1EC; margin-top: 8px; padding-top: 8px; }
+
+/* ── Modo oscuro ── */
+body.oscuro { background: #0D1411; color: #E4EDE7; }
+.oscuro .f-tabs { background: #18221C; }
+.oscuro .f-tab { color: #8FA79A; }
+.oscuro .f-tab-activo { background: #45E6A0; color: #0B3B2C; }
+.oscuro .f-card { background: #141D18; border-color: #243029; }
+.oscuro .f-card-rojo { border-color: #52322B; }
+.oscuro .f-card-rojo .f-titulo-card, .oscuro .f-rojo { color: #F2A28E; }
+.oscuro .f-input { background: #0D1411; border-color: #2E3C34; color: #E4EDE7; }
+.oscuro .f-subform { background: #101813; border-color: #243029; }
+.oscuro .f-chip, .oscuro .f-chip-mini { background: #1B2620; border-color: #2E3C34; color: #C4D4CA; }
+.oscuro .f-chip-activo { background: #45E6A0; border-color: #45E6A0; color: #0B3B2C; }
+.oscuro .f-btn-primario { background: #45E6A0; color: #0B3B2C; }
+.oscuro .f-btn-secundario { background: transparent; border-color: #45E6A0; color: #45E6A0; }
+.oscuro .f-btn-deshabilitado { background: #243029; color: #5E7268; }
+.oscuro .f-navbtn { color: #8FA79A; }
+.oscuro .f-navbtn:hover { background: #1B2620; }
+.oscuro .f-eyebrow, .oscuro .f-label, .oscuro .f-suave { color: #8FA79A; }
+.oscuro .f-verde, .oscuro .f-link { color: #45E6A0; }
+.oscuro .f-barra-fondo { background: #243029; }
+.oscuro .f-barra { background: #45E6A0; }
+.oscuro .mov { border-top-color: #243029; }
+.oscuro .f-divisor > * + * { border-color: #243029; }
+.oscuro .f-sep { border-top-color: #243029; }
+.oscuro .f-item-destacado { background: #2C2413; }
+.oscuro .f-alerta { background: #33170F; border-color: #5E2E20; color: #F2A28E; }
+.oscuro .f-hero { box-shadow: none; border: 1px solid #1E3A2E; }
+
+details.backup { margin-top: 24px; }
+details.backup summary { color: #7C8F84; font-size: 0.75rem; text-align: center; cursor: pointer; list-style: none; }
+details.backup summary::-webkit-details-marker { display: none; }
+
+svg { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .f-btn-primario:active, .f-btn-secundario:active { transform: none; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ── Configuración ───────────────────────────────────────────────────
+const STORAGE_KEY = "finanzas:v1";
+const CATS_GASTO = ["Alimentación", "Transporte", "Ocio", "Salud", "Deporte", "Niños", "Compras", "Regalos", "Otros"];
+const CATS_INGRESO = ["Nómina extra", "Venta", "Devolución", "Otros"];
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MC = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const PERIODOS = [{ v: 3, label: "Trimestral" }, { v: 6, label: "Semestral" }, { v: 12, label: "Anual" }];
+
+// Parámetros fiscales aproximados (tramos 2025)
+const TRAMOS_ESTATAL = [[12450, 0.095], [20200, 0.12], [35200, 0.15], [60000, 0.185], [300000, 0.225], [Infinity, 0.245]];
+const TRAMOS_CAT = [[12450, 0.105], [17707.2, 0.12], [21000, 0.14], [33007.2, 0.15], [53407.2, 0.188], [90000, 0.215], [120000, 0.235], [175000, 0.245], [Infinity, 0.255]];
+const MIN_PERSONAL = 5550, MIN_PERSONAL_CAT_BAJO = 6105, MIN_DESC = [2400, 2700, 4000, 4500], MIN_MENOR3 = 2800;
+const SS_EST = 0.065; // estimación cotización trabajador si no se indica
+const SS_EST_PARO = 0.047; // estimación cotización descontada en la prestación de paro
+
+const DEFAULT_DATA = {
+  transactions: [], config: { objetivoPct: 20, objetivoModo: "excedente", objetivoPctExc: 50, saldoAhorro: null, tema: "claro", renta: { hijos: 0, hijosMenores3: 0, compartidos: true, planPensiones: 0, ccaa: "cat" } },
+  ingresosFijos: [], gastosFijos: [], deudas: [], inversiones: [], anuales: [],
+};
+
+// ── Almacenamiento: window.storage (Claude) o localStorage (navegador) ──
+const store = {
+  async get(k) {
+    if (window.storage && window.storage.get) {
+      try { const r = await window.storage.get(k); return r ? r.value : null; } catch (e) { return null; }
+    }
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  },
+  async set(k, v) {
+    if (window.storage && window.storage.set) {
+      try { const r = await window.storage.set(k, v); return !!r; } catch (e) { return false; }
+    }
+    try { localStorage.setItem(k, v); return true; } catch (e) { return false; }
+  },
+};
+
+// ── Utilidades ──────────────────────────────────────────────────────
+const eur = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
+const fmtEur = (n) => eur.format(n);
+const parseNum = (v) => {
+  let s = String(v).trim();
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+};
+const parseSuma = (v) => String(v).split("+").reduce((s, p) => s + parseNum(p), 0);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+const hoyISO = () => {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+};
+const claveMes = (y, m) => y + "-" + String(m + 1).padStart(2, "0");
+
+// Iconos SVG
+const I = (d, s) => '<svg viewBox="0 0 24 24" width="' + (s||18) + '" height="' + (s||18) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+const IC = {
+  izq: I('<path d="M15 18l-6-6 6-6"/>', 20),
+  der: I('<path d="M9 18l6-6-6-6"/>', 20),
+  mas: I('<path d="M12 5v14M5 12h14"/>'),
+  x: I('<path d="M18 6L6 18M6 6l12 12"/>'),
+  ok: I('<path d="M20 6L9 17l-4-4"/>', 16),
+  okMini: I('<path d="M20 6L9 17l-4-4"/>', 14),
+  papelera: I('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/>', 15),
+  lapiz: I('<path d="M17 3l4 4L7 21H3v-4L17 3"/>', 15),
+  lapizMini: I('<path d="M17 3l4 4L7 21H3v-4L17 3"/>', 11),
+  descarga: I('<path d="M21 15v4H3v-4M12 3v12M7 10l5 5 5-5"/>', 14),
+  abajo: I('<path d="M6 9l6 6 6-6"/>', 18),
+  arriba: I('<path d="M18 15l-6-6-6 6"/>', 18),
+};
+
+// ── Estado ──────────────────────────────────────────────────────────
+let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let ui = {
+  cargando: true, errorGuardado: false,
+  tab: "resumen",
+  y: new Date().getFullYear(), m: new Date().getMonth(),
+  formTipo: null, formCat: "", nominaTipo: "nomina",
+  borrandoMov: null,
+  editor: null,        // { sec, id|null }
+  borrandoItem: null,  // { sec, id }
+  editandoPct: false,
+  rentaAño: null,
+  movAbierto: false,
+  confirmReset: false,
+  editandoSaldo: false,
+};
+
+async function persist() {
+  try {
+    const ok = await store.set(STORAGE_KEY, JSON.stringify(data));
+    if (!ok && !ui.errorGuardado) { ui.errorGuardado = true; render(); }
+    if (ok && ui.errorGuardado) { ui.errorGuardado = false; render(); }
+  } catch (e) {
+    if (!ui.errorGuardado) { ui.errorGuardado = true; render(); }
+  }
+}
+
+// ── Cálculos ────────────────────────────────────────────────────────
+function calc(anio, mes) {
+  const Y = anio == null ? ui.y : anio;
+  const M = mes == null ? ui.m : mes;
+  const totIngFijos = data.ingresosFijos.reduce((s, i) => s + i.importe, 0);
+  const totGastFijos = data.gastosFijos.reduce((s, i) => s + i.importe, 0);
+  const totCuotas = data.deudas.reduce((s, i) => s + i.cuota, 0);
+  const totInversiones = data.inversiones.reduce((s, i) => s + i.importe, 0);
+  const totProvision = data.anuales.reduce((s, i) => s + i.importe / (i.periodo || 12), 0);
+  const comprometido = totGastFijos + totCuotas + totProvision;
+  const totPendiente = data.deudas.reduce((s, i) => s + (i.pendiente || 0), 0);
+
+  const pref = claveMes(Y, M);
+  const txMes = data.transactions.filter((t) => t.date && t.date.startsWith(pref)).sort((a, b) => b.date.localeCompare(a.date));
+  const varIng = txMes.filter((t) => t.type === "ingreso").reduce((s, t) => s + t.amount, 0);
+  const varGas = txMes.filter((t) => t.type === "gasto").reduce((s, t) => s + t.amount, 0);
+
+  const ingresosMes = totIngFijos + varIng;
+  const excedente = ingresosMes - comprometido;
+  const ahorro = ingresosMes - comprometido - varGas;
+  const modo = data.config.objetivoModo || "ingresos";
+  const pctActivo = modo === "excedente" ? (data.config.objetivoPctExc != null ? data.config.objetivoPctExc : 50) : data.config.objetivoPct;
+  const objetivo = modo === "excedente" ? (Math.max(excedente, 0) * pctActivo) / 100 : (ingresosMes * pctActivo) / 100;
+  const progresoObj = objetivo > 0 ? (ahorro / objetivo) * 100 : null;
+  const margen = ingresosMes - comprometido - objetivo - varGas;
+  const ahorroLibre = ahorro - totInversiones;
+
+  const mapa = {};
+  txMes.filter((t) => t.type === "gasto").forEach((t) => { mapa[t.category] = (mapa[t.category] || 0) + t.amount; });
+  const porCategoria = Object.entries(mapa).sort((a, b) => b[1] - a[1]);
+  const maxCat = porCategoria.length ? porCategoria[0][1] : 0;
+
+  const tendencia = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(Y, M - i, 1);
+    const k = claveMes(d.getFullYear(), d.getMonth());
+    const del = data.transactions.filter((t) => t.date && t.date.startsWith(k));
+    const vi = del.filter((t) => t.type === "ingreso").reduce((s, t) => s + t.amount, 0);
+    const vg = del.filter((t) => t.type === "gasto").reduce((s, t) => s + t.amount, 0);
+    tendencia.push({ label: MC[d.getMonth()], valor: totIngFijos + vi - comprometido - vg, actual: i === 0 });
+  }
+  const maxTend = Math.max(...tendencia.map((t) => Math.abs(t.valor)), 1);
+
+  // Gasto variable típico: media de los últimos 3 meses con actividad (sin contar el visible)
+  let sumV = 0, nV = 0;
+  for (let i = 1; i <= 3; i++) {
+    const d = new Date(Y, M - i, 1);
+    const k = claveMes(d.getFullYear(), d.getMonth());
+    const del = data.transactions.filter((t) => t.date && t.date.startsWith(k));
+    if (del.length) { sumV += del.filter((t) => t.type === "gasto").reduce((s, t) => s + t.amount, 0); nV++; }
+  }
+  const mediaVar = nV ? sumV / nV : null;
+  const ahorroPosible = mediaVar != null && ingresosMes > 0 ? excedente - mediaVar : null;
+
+  const huchaTotal = data.anuales.reduce((s, i) => s + infoAnual(i).necesaria, 0);
+
+  return { totIngFijos, totGastFijos, totCuotas, totInversiones, totProvision, comprometido, totPendiente,
+    txMes, varIng, varGas, ingresosMes, excedente, ahorro, modo, pctActivo, objetivo, progresoObj, margen, ahorroLibre,
+    mediaVar, ahorroPosible, porCategoria, maxCat, tendencia, maxTend, huchaTotal };
+}
+
+function infoAnual(item) {
+  const mA = new Date().getMonth();
+  const P = item.periodo || 12;
+  const hasta = (((item.mesPago - mA) % P) + P) % P;
+  const desde = (((mA - item.mesPago) % P) + P) % P;
+  const necesaria = desde === 0 ? item.importe : (item.importe * desde) / P;
+  const proxMes = (mA + hasta) % 12;
+  return { hasta, desde, necesaria, provision: item.importe / P, proxMes, P };
+}
+
+// ── Secciones editables ─────────────────────────────────────────────
+const SECCIONES = {
+  ingresosFijos: {
+    titulo: "💶 Ingresos fijos", signo: "+", color: "f-verde", importeKey: "importe", acento: "#2CB57E",
+    campos: [
+      { key: "nombre", label: "Nombre", tipo: "text", ph: "Nómina" },
+      { key: "importe", label: "€ / mes", tipo: "importe" },
+    ],
+    pie: "Si tu ingreso es variable, deja esto vacío y registra tus nóminas cada mes desde la pestaña Mes.",
+  },
+  gastosFijos: {
+    titulo: "🏠 Gastos fijos mensuales", signo: "−", importeKey: "importe", acento: "#0B3B2C",
+    campos: [
+      { key: "nombre", label: "Nombre", tipo: "text", ph: "Luz, internet, gimnasio…" },
+      { key: "importe", label: "€ / mes", tipo: "importe" },
+    ],
+  },
+  deudas: {
+    titulo: "🔻 Deudas", signo: "−", importeKey: "cuota", ceroOk: true, acento: "#B0442F", rojo: true, colorImporte: "f-rojo", ocultarVacia: true,
+    campos: [
+      { key: "nombre", label: "Nombre", tipo: "text", ph: "Hipoteca, coche…" },
+      { key: "cuota", label: "Cuota € / mes", tipo: "importe" },
+      { key: "pendiente", label: "Pendiente €", tipo: "importe" },
+    ],
+    secundaria: (i) => (i.pendiente > 0 ? "Pendiente: " + fmtEur(i.pendiente) : ""),
+  },
+  inversiones: {
+    titulo: "📈 Inversiones automáticas", signo: "−", color: "f-verde", importeKey: "importe", acento: "#1E7A55",
+    campos: [
+      { key: "nombre", label: "Nombre", tipo: "text", ph: "Fondo indexado, plan pensiones…" },
+      { key: "importe", label: "€ / mes", tipo: "importe" },
+    ],
+    pie: "Cuentan como parte de tu ahorro, no como gasto.",
+  },
+  anuales: {
+    titulo: "📅 Gastos periódicos", signo: "−", importeKey: "importe", acento: "#D99A3D",
+    campos: [
+      { key: "nombre", label: "Nombre", tipo: "text", ph: "IBI, seguro coche, comunidad…" },
+      { key: "importe", label: "Importe del pago €", tipo: "importe" },
+      { key: "periodo", label: "Periodicidad", tipo: "periodo" },
+      { key: "mesPago", label: "Mes de pago", tipo: "mes" },
+    ],
+    secundaria: (i) => {
+      const inf = infoAnual(i);
+      const eti = (PERIODOS.find((p) => p.v === inf.P) || PERIODOS[2]).label.toLowerCase();
+      const cuando = inf.hasta === 0 ? "se paga este mes" : inf.hasta === 1 ? "el mes que viene" : "en " + inf.hasta + " meses";
+      return eti + " · próx: " + MC[inf.proxMes] + " (" + cuando + ") · aparta " + fmtEur(inf.provision) + "/mes · ten listos " + fmtEur(inf.necesaria);
+    },
+    destacar: (i) => infoAnual(i).hasta <= 1,
+    pie: "La provisión (importe ÷ meses del periodo) se descuenta cada mes en tu resumen. En trimestrales o semestrales, elige cualquiera de los meses en que toca pagar: el resto se calculan solos.",
+  },
+};
+
+// ── Render ──────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById("app");
+  document.body.classList.toggle("oscuro", data.config.tema === "oscuro");
+  if (ui.cargando) {
+    app.innerHTML = '<div class="contenedor fila centro" style="min-height:60vh"><p class="f-eyebrow">Cargando tus cuentas…</p></div>';
+    return;
+  }
+  const C = calc();
+  app.innerHTML =
+    '<div class="contenedor">' +
+    cabeceraHTML() +
+    (ui.errorGuardado ? '<div class="f-alerta">No se pudo guardar el último cambio. Los datos siguen en pantalla: reintenta con la próxima acción.</div>' : "") +
+    tabsHTML() +
+    (ui.tab === "resumen" ? tabResumen() : ui.tab === "mes" ? tabMes(C) : ui.tab === "fijos" ? tabFijos(C) : ui.tab === "anuales" ? tabAnuales(C) : tabRenta()) +
+    backupHTML() +
+    '<p class="f-suave peq centrado mt6">Tus datos se guardan automáticamente en este dispositivo.</p>' +
+    "</div>";
+}
+
+function cabeceraHTML() {
+  const osc = data.config.tema === "oscuro";
+  return '<div class="fila entre mb2"><span class="f-eyebrow">💚 Mis finanzas</span>' +
+    '<button class="f-navbtn" style="font-size:1.05rem" onclick="toggleTema()" aria-label="Cambiar entre modo claro y oscuro">' + (osc ? "☀️" : "🌙") + "</button></div>";
+}
+function toggleTema() {
+  data.config.tema = data.config.tema === "oscuro" ? "claro" : "oscuro";
+  persist(); render();
+}
+
+function tabsHTML() {
+  const t = [["resumen", "Resumen"], ["mes", "Mes"], ["fijos", "Fijos"], ["anuales", "Hucha"], ["renta", "Renta"]];
+  return '<nav class="f-tabs mb4">' + t.map(([k, l]) =>
+    '<button class="f-tab ' + (ui.tab === k ? "f-tab-activo" : "") + '" onclick="setTab(\'' + k + '\')">' + l + "</button>"
+  ).join("") + "</nav>";
+}
+
+function linea(label, valor, signo, destacado) {
+  return '<div class="f-linea ' + (destacado ? "negrita" : "") + '"><span class="' + (destacado ? "" : "f-eyebrow-claro") + '">' + label + '</span><span class="f-mono">' + (signo || "") + fmtEur(Math.abs(valor)) + "</span></div>";
+}
+
+// ── Pestaña Resumen: el mes actual, en claro ──
+function nombreMes(ym) { return MESES[Number(ym.slice(5, 7)) - 1] + " " + ym.slice(0, 4); }
+function frase(txt, val, cls) {
+  return '<div class="fila entre sm" style="margin-top:4px"><span>' + txt + '</span><span class="f-mono negrita ' + (cls || "") + '">' + fmtEur(val) + "</span></div>";
+}
+function tabResumen() {
+  const hoy = new Date();
+  const C = calc(hoy.getFullYear(), hoy.getMonth());
+  const totIng = data.transactions.filter((t) => t.type === "ingreso").reduce((s, t) => s + t.amount, 0);
+  const totGas = data.transactions.filter((t) => t.type === "gasto").reduce((s, t) => s + t.amount, 0);
+  const acumulado = totIng - totGas;
+  const primerMes = data.transactions.length ? data.transactions.reduce((m, t) => (t.date < m ? t.date : m), "9999").slice(0, 7) : null;
+  let h = "";
+
+  // Lo ahorrado: ancla real ajustable + movimientos posteriores
+  const sa = data.config.saldoAhorro;
+  let saldoReal = acumulado, desdeAjuste = null;
+  if (sa && sa.importe != null) {
+    desdeAjuste = data.transactions.filter((t) => t.date > sa.fecha).reduce((s, t) => s + (t.type === "ingreso" ? t.amount : -t.amount), 0);
+    saldoReal = sa.importe + desdeAjuste;
+  }
+  h += '<section class="f-hero mb4"><div class="fila entre mb2"><p class="f-eyebrow-claro">💰 Lo que tienes ahorrado</p>' +
+    (ui.editandoSaldo
+      ? '<span class="fila gap1"><input id="saldoInput" class="f-input-oscuro f-mono" style="width:96px" inputmode="decimal" value="' + (Math.round(saldoReal * 100) / 100).toFixed(2).replace(".", ",") + '"><span class="f-eyebrow-claro">€</span><button class="f-minibtn" onclick="guardarSaldo()" aria-label="Guardar">' + IC.okMini + "</button></span>"
+      : '<button class="f-pct-chip f-mono" onclick="editarSaldo()">ajustar ' + IC.lapizMini + "</button>") +
+    "</div>" +
+    '<span class="f-mono f-cifra ' + (saldoReal >= 0 ? "f-mint" : "f-brick-claro") + '">' + (saldoReal >= 0 ? "+" : "−") + fmtEur(Math.abs(saldoReal)) + "</span>" +
+    (sa && sa.importe != null
+      ? '<p class="f-tasa mt1">Fijaste ' + fmtEur(sa.importe) + " el " + sa.fecha.slice(8, 10) + " " + MC[Number(sa.fecha.slice(5, 7)) - 1] + (desdeAjuste ? " · desde entonces " + (desdeAjuste >= 0 ? "+" : "−") + fmtEur(Math.abs(desdeAjuste)) + " según tus apuntes" : "") + ". Toca «ajustar» cuando quieras cuadrarlo con la realidad.</p>"
+      : '<p class="f-tasa mt1">Calculado con tus apuntes (ingresos − gastos' + (primerMes ? " desde " + nombreMes(primerMes) : "") + "). Si no coincide con lo que tienes de verdad, toca «ajustar» y pon la cifra real.</p>") +
+    "</section>";
+
+  // Este mes
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">📅 Este mes (' + MESES[hoy.getMonth()] + ")</h2>" +
+    frase("Has ingresado", C.ingresosMes, "f-verde") +
+    frase("Has gastado en el día a día", C.varGas, "") +
+    frase("Tus fijos y provisiones suman", C.comprometido, "") +
+    '<div class="f-sep">' +
+    frase("Ahorro del mes por ahora", C.ahorro, C.ahorro >= 0 ? "f-verde" : "") + "</div></section>";
+
+  // Objetivo
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🎯 Tu objetivo</h2>';
+  if (C.ingresosMes === 0) {
+    h += '<p class="sm f-suave">Aún no has apuntado ningún ingreso este mes. Añade tu nómina o paro en la pestaña Mes y te diré cuánto deberías ahorrar.</p>';
+  } else {
+    const falta = Math.max(C.objetivo - C.ahorro, 0);
+    h += '<p class="sm">Este mes deberías ahorrar <span class="f-mono negrita">' + fmtEur(C.objetivo) + "</span>.</p>";
+    h += C.ahorro >= C.objetivo
+      ? '<p class="sm f-verde negrita mt1">¡Conseguido! Vas ' + fmtEur(C.ahorro - C.objetivo) + " por encima.</p>"
+      : '<p class="sm mt1">Llevas <span class="f-mono negrita">' + fmtEur(Math.max(C.ahorro, 0)) + '</span> · te faltan <span class="f-mono negrita">' + fmtEur(falta) + "</span>.</p>";
+    const w = Math.max(Math.min(C.progresoObj || 0, 100), 0);
+    h += '<div class="f-barra-fondo mt2" style="height:10px;border-radius:999px"><div class="' + (C.ahorro >= C.objetivo ? "f-barra-mint" : "f-barra") + '" style="height:10px;border-radius:999px;width:' + w + '%"></div></div>';
+    h += '<p class="sm mt3">' + (C.margen >= 0
+      ? 'Todavía puedes gastar <span class="f-mono negrita f-verde">' + fmtEur(C.margen) + "</span> sin tocar el objetivo."
+      : 'Ojo: vas <span class="f-mono negrita f-rojo">' + fmtEur(Math.abs(C.margen)) + "</span> pasado de lo que permite tu objetivo.") + "</p>";
+  }
+  h += "</section>";
+
+  // Pagos grandes (hucha)
+  if (data.anuales.length) {
+    const orden = [...data.anuales].sort((a, b) => infoAnual(a).hasta - infoAnual(b).hasta);
+    h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🐷 Pagos grandes que vienen</h2>' +
+      '<p class="sm">Deberías tener ya apartados <span class="f-mono negrita">' + fmtEur(C.huchaTotal) + "</span> para cubrirlos.</p><ul>";
+    orden.slice(0, 3).forEach((i) => {
+      const inf = infoAnual(i);
+      const cuando = inf.hasta === 0 ? "este mes" : inf.hasta === 1 ? "el mes que viene" : "en " + inf.hasta + " meses";
+      h += '<li class="mov"><div class="crece"><p class="sm trunca">' + esc(i.nombre) + '</p><p class="f-suave peq">' + cuando + '</p></div><span class="f-mono sm">' + fmtEur(i.importe) + "</span></li>";
+    });
+    h += "</ul></section>";
+  }
+
+  // Deudas
+  if (C.totPendiente > 0) {
+    h += '<section class="f-card f-card-rojo mb4" style="border-left:4px solid #B0442F"><h2 class="f-titulo-card mb2">🔻 Deudas</h2><p class="sm">Tienes pendiente devolver <span class="f-mono negrita f-rojo">' + fmtEur(C.totPendiente) + "</span>" +
+      (data.deudas.length === 1 ? " (" + esc(data.deudas[0].nombre) + ")" : "") + ".</p></section>";
+  }
+
+  h += '<p class="f-suave peq centrado">El detalle vive en las otras pestañas: Mes (apuntar), Fijos (tu plan), Hucha (pagos grandes) y Renta.</p>';
+  return h;
+}
+
+// ── Pestaña Mes ──
+function tabMes(C) {
+  let h = '<div class="fila entre mb3">' +
+    '<button class="f-navbtn" onclick="cambiarMes(-1)" aria-label="Mes anterior">' + IC.izq + "</button>" +
+    '<h1 class="f-eyebrow">' + MESES[ui.m] + " " + ui.y + "</h1>" +
+    '<button class="f-navbtn" onclick="cambiarMes(1)" aria-label="Mes siguiente">' + IC.der + "</button></div>";
+
+  // Hero
+  h += '<section class="f-hero mb4">';
+  h += '<div class="fila entre mb2"><p class="f-eyebrow-claro">🎯 Objetivo de ahorro</p>';
+  if (ui.editandoPct) {
+    h += '<span class="fila gap1"><input id="pctInput" class="f-input-oscuro f-mono" inputmode="numeric" value="' + C.pctActivo + '"><span class="f-eyebrow-claro">%</span><button class="f-minibtn" onclick="guardarPct()" aria-label="Guardar">' + IC.okMini + "</button></span>";
+  } else {
+    h += '<button class="f-pct-chip f-mono" onclick="editarPct()">' + C.pctActivo + "% " + IC.lapizMini + "</button>";
+  }
+  h += "</div>";
+  h += '<div class="fila gap1 mb2">' +
+    '<button class="f-modo' + (C.modo !== "excedente" ? " f-modo-on" : "") + '" onclick="setModoObjetivo(\'ingresos\')">% de ingresos</button>' +
+    '<button class="f-modo' + (C.modo === "excedente" ? " f-modo-on" : "") + '" onclick="setModoObjetivo(\'excedente\')">% del excedente</button></div>';
+
+  if (C.ingresosMes === 0) {
+    h += '<p class="sm" style="color:#9FC4B2;padding:8px 0">Añade tu nómina de este mes (o un ingreso) para calcular tu objetivo.</p>';
+  } else {
+    h += '<div class="fila gap2" style="flex-wrap:wrap;align-items:baseline">' +
+      '<span class="f-mono f-cifra ' + (C.ahorro >= 0 ? "f-mint" : "f-brick-claro") + '">' + (C.ahorro >= 0 ? "+" : "−") + fmtEur(Math.abs(C.ahorro)) + "</span>" +
+      '<span class="f-mono f-tasa">de ' + fmtEur(C.objetivo) + " objetivo</span></div>";
+    const w = Math.max(Math.min(C.progresoObj || 0, 100), 0);
+    h += '<div class="f-tira"><div class="' + (C.ahorro >= C.objetivo ? "f-tira-ahorro" : "f-tira-progreso") + '" style="width:' + w + '%"></div></div>';
+    h += '<p class="f-mono f-tasa mt1">' + (C.progresoObj !== null ? Math.round(C.progresoObj) + "% del objetivo" + (C.progresoObj >= 100 ? " · conseguido ✓" : "") : "") + "</p>";
+    h += '<p class="f-tasa mt1">' + (C.modo === "excedente"
+      ? C.pctActivo + "% del excedente tras compromisos (" + fmtEur(Math.max(C.excedente, 0)) + ")"
+      : C.pctActivo + "% de lo ingresado este mes") + "</p>";
+    h += '<div class="f-desglose">' +
+      linea("Ingresos", C.ingresosMes, "+") +
+      linea("Fijos + deudas + provisión", C.comprometido, "−") +
+      linea("Gastos variables", C.varGas, "−") + "</div>";
+    h += '<div class="f-caja ' + (C.margen >= 0 ? "f-caja-ok" : "f-caja-aviso") + '">' +
+      (C.margen >= 0
+        ? 'Puedes gastar aún <span class="f-mono negrita">' + fmtEur(C.margen) + "</span> este mes sin tocar tu objetivo."
+        : 'Vas <span class="f-mono negrita">' + fmtEur(Math.abs(C.margen)) + "</span> por encima de lo que permite tu objetivo.") + "</div>";
+    if (C.totInversiones > 0) {
+      h += '<p class="f-eyebrow-claro mt3" style="text-transform:none;letter-spacing:0">' +
+        (C.ahorro >= C.totInversiones
+          ? "De tu ahorro, " + fmtEur(C.totInversiones) + " van a inversión automática · " + fmtEur(C.ahorroLibre) + " quedan libres."
+          : "Ojo: tu inversión automática (" + fmtEur(C.totInversiones) + ") supera el ahorro de este mes.") + "</p>";
+    }
+    if (C.ahorroPosible != null) {
+      h += '<p class="f-eyebrow-claro mt2" style="text-transform:none;letter-spacing:0">Tu gasto variable típico ronda ' + fmtEur(C.mediaVar) + "/mes → este mes podrías llegar a ahorrar ≈ " + fmtEur(Math.max(C.ahorroPosible, 0)) + ".</p>";
+    }
+  }
+  h += "</section>";
+
+  // Botones o formulario
+  if (!ui.formTipo) {
+    h += '<div class="grid2" style="margin-bottom:8px">' +
+      '<button class="f-btn f-btn-primario" onclick="abrirForm(\'gasto\')">' + IC.mas + " Gasto</button>" +
+      '<button class="f-btn f-btn-secundario" onclick="abrirForm(\'nomina\')">' + IC.mas + " Nómina / paro</button></div>" +
+      '<div class="centrado mb5"><button class="f-link" onclick="abrirForm(\'ingreso\')">' + IC.mas + " Otro ingreso</button></div>";
+  } else if (ui.formTipo === "nomina") {
+    h += formNominaHTML();
+  } else {
+    const cats = ui.formTipo === "ingreso" ? CATS_INGRESO : CATS_GASTO;
+    h += '<section class="f-card mb5">' +
+      '<div class="fila entre mb3"><h2 class="f-titulo-card">Nuevo ' + (ui.formTipo === "ingreso" ? "ingreso extra" : "gasto") + '</h2>' +
+      '<button class="f-navbtn" onclick="cerrarForm()" aria-label="Cerrar">' + IC.x + "</button></div>" +
+      '<label class="f-label">Importe</label>' +
+      '<div class="fila gap2 mb3"><input id="mImporte" class="f-input f-mono f-input-grande" type="text" inputmode="decimal" placeholder="0,00" autofocus>' +
+      '<span class="f-mono f-suave" style="font-size:1.5rem">€</span></div>' +
+      '<label class="f-label">Categoría</label><div class="chips mb3">' +
+      cats.map((c) => '<button class="f-chip' + (ui.formCat === c ? " f-chip-activo" : "") + '" data-cat="' + esc(c) + '" onclick="selCat(this)">' + esc(c) + "</button>").join("") +
+      "</div>" +
+      '<div class="grid2 mb3"><div><label class="f-label">Fecha</label><input id="mFecha" class="f-input" type="date" value="' + hoyISO() + '"></div>' +
+      '<div><label class="f-label">Nota (opcional)</label><input id="mNota" class="f-input" type="text" placeholder="Mercadona, gasolina…"></div></div>' +
+      '<button class="f-btn f-btn-primario" onclick="guardarMovimiento()">' + IC.ok + " Guardar</button></section>";
+  }
+
+  // Categorías
+  if (C.porCategoria.length) {
+    h += '<section class="f-card mb5"><h2 class="f-titulo-card mb3">🛒 Gastos variables por categoría</h2>';
+    C.porCategoria.forEach(([cat, tot]) => {
+      h += '<div class="mb2"><div class="fila entre sm mb1" style="margin-bottom:4px"><span>' + esc(cat) + '</span><span class="f-mono">' + fmtEur(tot) + "</span></div>" +
+        '<div class="f-barra-fondo"><div class="f-barra" style="width:' + (tot / C.maxCat) * 100 + '%"></div></div></div>';
+    });
+    h += "</section>";
+  }
+
+  // Tendencia
+  h += '<section class="f-card mb5"><h2 class="f-titulo-card mb3">📊 Ahorro · últimos 6 meses</h2><div class="barras6">';
+  C.tendencia.forEach((t) => {
+    const alto = Math.max((Math.abs(t.valor) / C.maxTend) * 100, t.valor !== 0 ? 6 : 2);
+    h += "<div><div class=\"barra-v " + (t.valor >= 0 ? "f-barra-mint" : "f-barra-brick") + (t.actual ? "" : " opaca") + '" style="height:' + alto + '%" title="' + fmtEur(t.valor) + '"></div>' +
+      '<span class="peq mt1 ' + (t.actual ? "negrita" : "f-suave") + '">' + t.label + "</span></div>";
+  });
+  h += "</div></section>";
+
+  // Movimientos (desplegable)
+  h += '<section class="f-card">' +
+    '<button class="f-despl fila entre" onclick="ui.movAbierto=!ui.movAbierto;render()" aria-expanded="' + ui.movAbierto + '">' +
+    '<span class="f-titulo-card">🧾 Movimientos variables <span class="f-suave" style="font-weight:400">(' + C.txMes.length + ")</span></span>" +
+    '<span class="f-navbtn">' + (ui.movAbierto ? IC.arriba : IC.abajo) + "</span></button>";
+  if (ui.movAbierto) {
+    if (data.transactions.length) {
+      h += '<div class="fila mt2" style="justify-content:flex-end"><button class="f-link" onclick="exportarCSV()">' + IC.descarga + " CSV</button></div>";
+    }
+    if (!C.txMes.length) {
+      h += '<p class="f-suave sm centrado" style="padding:16px 0">Sin movimientos en ' + MESES[ui.m] + ". Los fijos ya están contados: aquí solo lo variable.</p>";
+    } else {
+      h += "<ul>";
+      C.txMes.forEach((t) => {
+        h += '<li class="mov"><div class="crece"><p class="sm trunca">' + esc(t.category) + (t.note ? '<span class="f-suave"> · ' + esc(t.note) + "</span>" : "") + "</p>" +
+          '<p class="f-suave peq f-mono">' + t.date.slice(8, 10) + " " + MC[Number(t.date.slice(5, 7)) - 1] + "</p></div>" +
+          '<span class="f-mono sm ' + (t.type === "ingreso" ? "f-verde" : "") + '">' + (t.type === "ingreso" ? "+" : "−") + fmtEur(t.amount) + "</span>";
+        if (ui.borrandoMov === t.id) {
+          h += '<div class="fila gap1"><button class="f-btn-borrar-conf" onclick="borrarMov(\'' + t.id + '\')">Borrar</button>' +
+            '<button class="f-chip-mini" onclick="ui.borrandoMov=null;render()">No</button></div>';
+        } else {
+          h += '<button class="f-navbtn" onclick="ui.borrandoMov=\'' + t.id + '\';render()" aria-label="Borrar">' + IC.papelera + "</button>";
+        }
+        h += "</li>";
+      });
+      h += "</ul>";
+    }
+  }
+  h += "</section>";
+  return h;
+}
+
+// ── Pestaña Plan fijo ──
+function tabFijos(C) {
+  let h = listaHTML("ingresosFijos") + listaHTML("gastosFijos") + listaHTML("deudas", C) + listaHTML("inversiones");
+  h += '<section class="f-hero mb5"><h2 class="f-eyebrow-claro mb2">🧮 Resumen mensual del plan</h2>' +
+    linea("Ingresos fijos", C.totIngFijos, "+") +
+    linea("Gastos fijos", C.totGastFijos, "−") +
+    linea("Cuotas de deudas", C.totCuotas, "−") +
+    linea("Provisión periódicos", C.totProvision, "−") +
+    '<div class="f-desglose">' + linea("Comprometido total al mes", C.comprometido, "−", true) +
+    (C.totIngFijos > 0 ? linea("Queda para variables + ahorro", C.totIngFijos - C.comprometido, "") : "") + "</div>" +
+    (C.totInversiones > 0 ? linea("→ de ahí, inversión automática", C.totInversiones, "") : "") +
+    "</section>";
+  return h;
+}
+
+// ── Pestaña Periódicos ──
+function tabAnuales(C) {
+  let h = '<section class="f-hero mb4"><h2 class="f-eyebrow-claro mb2">🐷 Hucha de periódicos</h2>' +
+    '<div class="fila gap2" style="align-items:baseline;flex-wrap:wrap"><span class="f-mono f-cifra-media f-mint">' + fmtEur(C.totProvision) + '</span><span class="f-tasa f-mono">/ mes a apartar</span></div>' +
+    '<p class="f-eyebrow-claro mt2" style="text-transform:none;letter-spacing:0">A día de hoy deberías tener <span class="f-mono negrita">' + fmtEur(C.huchaTotal) + "</span> acumulados para cubrir los próximos pagos.</p></section>";
+  h += listaHTML("anuales");
+  return h;
+}
+
+// ── Pestaña Renta (estimación IRPF) ──
+function cuotaEscala(tramos, base) {
+  let c = 0, prev = 0;
+  for (const [lim, t] of tramos) {
+    const tramo = Math.min(base, lim) - prev;
+    if (tramo > 0) c += tramo * t;
+    if (base <= lim) break;
+    prev = lim;
+  }
+  return c;
+}
+
+function calcRenta(anyo) {
+  const cfg = data.config.renta || DEFAULT_DATA.config.renta;
+  const noms = data.transactions
+    .filter((t) => t.bruto != null && t.date && t.date.startsWith(anyo))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const bruto = noms.reduce((s, t) => s + t.bruto, 0);
+  const irpf = noms.reduce((s, t) => s + (t.irpf || 0), 0);
+  const ss = noms.reduce((s, t) => s + (t.ss != null ? t.ss : t.bruto * (t.category === "Paro" ? SS_EST_PARO : SS_EST)), 0);
+  const ssEstimadas = noms.some((t) => t.ss == null);
+  const sindical = noms.reduce((s, t) => s + (t.sindical || 0), 0);
+
+  const rnt = Math.max(bruto - ss - sindical - 2000, 0); // rendimiento neto del trabajo
+  let red = 0; // reducción por rendimientos del trabajo (2025)
+  if (rnt <= 14852) red = 7302;
+  else if (rnt <= 17673.52) red = 7302 - 1.75 * (rnt - 14852);
+  else if (rnt < 19747.5) red = 2364.34 - 1.14 * (rnt - 17673.52);
+  red = Math.max(Math.min(red, rnt), 0);
+
+  const plan = Math.min(cfg.planPensiones || 0, 1500);
+  const base = Math.max(rnt - red - plan, 0);
+
+  let minDesc = 0;
+  for (let i = 0; i < (cfg.hijos || 0); i++) minDesc += MIN_DESC[Math.min(i, 3)];
+  minDesc += (cfg.hijosMenores3 || 0) * MIN_MENOR3;
+  if (cfg.compartidos !== false) minDesc /= 2;
+
+  const esCat = (cfg.ccaa || "cat") === "cat";
+  const tramosAut = esCat ? TRAMOS_CAT : TRAMOS_ESTATAL;
+  const minEstatal = MIN_PERSONAL + minDesc;
+  const minAut = (esCat && base <= 12450 ? MIN_PERSONAL_CAT_BAJO : MIN_PERSONAL) + minDesc;
+
+  const cuotaEst = Math.max(cuotaEscala(TRAMOS_ESTATAL, base) - cuotaEscala(TRAMOS_ESTATAL, Math.min(minEstatal, base)), 0);
+  const cuotaAut = Math.max(cuotaEscala(tramosAut, base) - cuotaEscala(tramosAut, Math.min(minAut, base)), 0);
+  const cuota = cuotaEst + cuotaAut;
+  const resultado = cuota - irpf; // + a pagar · − a devolver
+  const tipoMedio = bruto > 0 ? (cuota / bruto) * 100 : 0;
+  return { noms, bruto, irpf, ss, ssEstimadas, sindical, rnt, red, plan, base, minimo: minEstatal, cuotaEst, cuotaAut, esCat, cuota, resultado, tipoMedio };
+}
+
+function setRentaAño(a) { ui.rentaAño = a; render(); }
+
+function tabRenta() {
+  const años = [...new Set(data.transactions.filter((t) => t.bruto != null && t.date).map((t) => t.date.slice(0, 4)))].sort();
+  const actual = String(new Date().getFullYear());
+  if (!ui.rentaAño) ui.rentaAño = años.includes(actual) ? actual : años[años.length - 1] || actual;
+  const R = calcRenta(ui.rentaAño);
+  const cfg = data.config.renta || {};
+  let h = "";
+
+  if (años.length > 1) {
+    h += '<div class="chips mb3">' + años.map((a) =>
+      '<button class="f-chip' + (ui.rentaAño === a ? " f-chip-activo" : "") + '" onclick="setRentaAño(\'' + a + '\')">' + a + "</button>").join("") + "</div>";
+  }
+
+  // Resultado
+  h += '<section class="f-hero mb4"><p class="f-eyebrow-claro mb2">Renta ' + ui.rentaAño + " · estimación</p>";
+  if (!R.noms.length) {
+    h += '<p class="sm" style="color:#9FC4B2;padding:8px 0">Añade tus nóminas desde la pestaña Mes (botón «Nómina») con su bruto e IRPF, y aquí verás lo que te saldría a pagar o a devolver.</p>';
+  } else {
+    const aDevolver = R.resultado < -0.5, aPagar = R.resultado > 0.5;
+    h += '<div class="fila gap2" style="align-items:baseline;flex-wrap:wrap">' +
+      '<span class="f-mono f-cifra ' + (aPagar ? "f-brick-claro" : "f-mint") + '">' +
+      (aDevolver || aPagar ? fmtEur(Math.abs(R.resultado)) : "≈ 0 €") + "</span>" +
+      '<span class="f-tasa f-mono">' + (aDevolver ? "a devolver" : aPagar ? "a pagar" : "prácticamente ajustado") + "</span></div>" +
+      '<p class="f-eyebrow-claro mt2" style="text-transform:none;letter-spacing:0">Con ' + R.noms.length +
+      (R.noms.length === 1 ? " nómina" : " nóminas") + " registradas · tipo medio estimado " + R.tipoMedio.toFixed(1).replace(".", ",") + "%</p>";
+  }
+  h += "</section>";
+
+  const tieneParo = R.noms.some((t) => t.category === "Paro");
+  const tieneNomina = R.noms.some((t) => t.category !== "Paro");
+  if (tieneParo) {
+    h += '<div class="f-card mb4" style="background:#FDF3E7;border-color:#EAD9B8"><p class="sm">' +
+      (tieneNomina ? "Este año tienes <span class='negrita'>dos pagadores</span> (empresa + SEPE). " : "") +
+      "Quien cobra paro está obligado a presentar la declaración desde 2024. Como cada pagador retiene como si fuera el único, es habitual que salga a pagar: este cálculo ya lo refleja al sumarlo todo.</p></div>";
+  }
+
+  // Desglose del cálculo
+  if (R.noms.length) {
+    h += '<section class="f-card mb4"><h2 class="f-titulo-card mb3">🧮 Cómo sale el cálculo</h2>' +
+      lineaCard("Bruto anual", R.bruto, "") +
+      lineaCard("Seguridad Social" + (R.ssEstimadas ? " (parte estimada 6,5%)" : ""), R.ss, "−") +
+      (R.sindical > 0 ? lineaCard("Cuota sindical", R.sindical, "−") : "") +
+      lineaCard("Otros gastos deducibles", 2000, "−") +
+      (R.red > 0 ? lineaCard("Reducción rend. trabajo", R.red, "−") : "") +
+      (R.plan > 0 ? lineaCard("Plan de pensiones", R.plan, "−") : "") +
+      '<div class="f-sep">' +
+      lineaCard("Base liquidable", R.base, "", true) +
+      lineaCard("Mínimo personal y familiar", R.minimo, "") +
+      lineaCard("Cuota estatal", R.cuotaEst, "") +
+      lineaCard(R.esCat ? "Cuota autonómica (Cataluña)" : "Cuota autonómica (estatal ×2)", R.cuotaAut, "") +
+      lineaCard("Cuota total estimada", R.cuota, "", true) +
+      lineaCard("IRPF ya retenido", R.irpf, "−") +
+      "</div></section>";
+  }
+
+  // Situación personal
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb3">👤 Tu situación</h2><div class="grid2 mb2">' +
+    '<div><label class="f-label">Hijos</label><input id="r_hijos" class="f-input f-mono" type="text" inputmode="numeric" value="' + (cfg.hijos || 0) + '"></div>' +
+    '<div><label class="f-label">De ellos, menores de 3</label><input id="r_menores3" class="f-input f-mono" type="text" inputmode="numeric" value="' + (cfg.hijosMenores3 || 0) + '"></div>' +
+    '<div class="span2"><label class="f-label">Plan de pensiones € / año <span style="text-transform:none">(máx. 1.500 deducible)</span></label>' +
+    '<input id="r_plan" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(cfg.planPensiones || 0).replace(".", ",") + '"></div>' +
+    '<div class="span2"><label class="f-label">Escala autonómica</label><select id="r_ccaa" class="f-input">' +
+    '<option value="cat"' + ((cfg.ccaa || "cat") === "cat" ? " selected" : "") + '>Cataluña</option>' +
+    '<option value="generica"' + (cfg.ccaa === "generica" ? " selected" : "") + '>Genérica (estatal ×2)</option></select></div>' +
+    '<label class="span2 fila gap2 sm"><input id="r_compartidos" type="checkbox"' + (cfg.compartidos !== false ? " checked" : "") + "> Hijos compartidos con otro progenitor (mínimo al 50%)</label>" +
+    '</div><button class="f-btn f-btn-primario f-btn-sm" onclick="guardarConfigRenta()">' + IC.okMini + " Guardar situación</button></section>";
+
+  // Nóminas del año
+  if (R.noms.length) {
+    h += '<section class="f-card mb4"><h2 class="f-titulo-card mb3">🧾 Nóminas de ' + ui.rentaAño + "</h2><ul>";
+    R.noms.forEach((t) => {
+      const pct = t.bruto > 0 ? ((t.irpf || 0) / t.bruto) * 100 : 0;
+      h += '<li class="mov"><div class="crece"><p class="sm trunca">' + t.date.slice(8, 10) + " " + MC[Number(t.date.slice(5, 7)) - 1] +
+        ' <span class="f-suave">· ' + (t.category === "Paro" ? "paro" : "nómina") + (t.note ? " · " + esc(t.note) : "") + "</span></p>" +
+        '<p class="f-suave peq f-mono">IRPF ' + fmtEur(t.irpf || 0) + " (" + pct.toFixed(1).replace(".", ",") + "%)</p></div>" +
+        '<span class="f-mono sm">' + fmtEur(t.bruto) + "</span>";
+      if (ui.borrandoMov === t.id) {
+        h += '<div class="fila gap1"><button class="f-btn-borrar-conf" onclick="borrarMov(\'' + t.id + '\')">Borrar</button>' +
+          '<button class="f-chip-mini" onclick="ui.borrandoMov=null;render()">No</button></div>';
+      } else {
+        h += '<button class="f-navbtn" onclick="ui.borrandoMov=\'' + t.id + '\';render()" aria-label="Borrar">' + IC.papelera + "</button>";
+      }
+      h += "</li>";
+    });
+    h += '</ul><p class="f-suave peq mt3">Aquí se muestra el bruto; en la pestaña Mes cuenta el neto como ingreso. Para corregir una nómina, bórrala y vuelve a añadirla.</p></section>';
+  }
+
+  h += '<p class="f-suave peq">Cálculo orientativo con parámetros de 2025 y la escala estatal + autonómica seleccionada: no incluye deducciones autonómicas específicas ni por maternidad, otros rendimientos (alquileres, inversiones…) ni situaciones especiales. Para el dato real, Renta Web o un asesor.</p>';
+  return h;
+}
+
+function lineaCard(label, valor, signo, destacado) {
+  return '<div class="fila entre sm ' + (destacado ? "negrita" : "") + '" style="margin-top:4px"><span class="' + (destacado ? "" : "f-suave") + '">' + label + '</span><span class="f-mono">' + (signo || "") + fmtEur(Math.abs(valor)) + "</span></div>";
+}
+
+function guardarConfigRenta() {
+  const hijos = Math.max(0, Math.round(parseNum(document.getElementById("r_hijos").value)));
+  const men3 = Math.min(hijos, Math.max(0, Math.round(parseNum(document.getElementById("r_menores3").value))));
+  data.config.renta = {
+    hijos,
+    hijosMenores3: men3,
+    compartidos: document.getElementById("r_compartidos").checked,
+    planPensiones: Math.max(0, parseNum(document.getElementById("r_plan").value)),
+    ccaa: document.getElementById("r_ccaa").value,
+  };
+  persist();
+  render();
+}
+
+// ── Lista editable genérica ──
+function listaHTML(sec, C) {
+  const cfg = SECCIONES[sec];
+  const items = data[sec];
+  const editorAbierto = ui.editor && ui.editor.sec === sec;
+  if (cfg.ocultarVacia && !items.length && !editorAbierto) {
+    return '<div class="mb4"><button class="f-link f-rojo" onclick="abrirEditor(\'' + sec + '\')">' + IC.mas + " Añadir una deuda</button></div>";
+  }
+  const total = items.reduce((s, i) => s + (i[cfg.importeKey] || 0), 0);
+  let h = '<section class="f-card mb4' + (cfg.rojo ? " f-card-rojo" : "") + '"' + (cfg.acento ? ' style="border-left:4px solid ' + cfg.acento + '"' : "") + '><div class="fila entre mb2"><h2 class="f-titulo-card">' + cfg.titulo + "</h2>" +
+    '<span class="f-mono sm negrita ' + (cfg.color || "") + '">' + cfg.signo + fmtEur(total) + "</span></div>";
+
+  if (!items.length && !(ui.editor && ui.editor.sec === sec)) {
+    h += '<p class="f-suave sm" style="padding:8px 0">Nada aquí todavía.</p>';
+  }
+
+  h += "<ul>";
+  items.forEach((item) => {
+    const dest = cfg.destacar && cfg.destacar(item);
+    const secTxt = cfg.secundaria ? cfg.secundaria(item) : "";
+    h += '<li class="mov' + (dest ? " f-item-destacado" : "") + '"><div class="crece"><p class="sm trunca">' + esc(item.nombre) + "</p>" +
+      (secTxt ? '<p class="f-suave peq">' + secTxt + "</p>" : "") + "</div>" +
+      '<span class="f-mono sm ' + (cfg.color || "") + '">' + cfg.signo + fmtEur(item[cfg.importeKey] || 0) + "</span>";
+    if (ui.borrandoItem && ui.borrandoItem.sec === sec && ui.borrandoItem.id === item.id) {
+      h += '<div class="fila gap1"><button class="f-btn-borrar-conf" onclick="borrarItem(\'' + sec + "','" + item.id + '\')">Borrar</button>' +
+        '<button class="f-chip-mini" onclick="ui.borrandoItem=null;render()">No</button></div>';
+    } else {
+      h += '<div class="fila"><button class="f-navbtn" onclick="abrirEditor(\'' + sec + "','" + item.id + '\')" aria-label="Editar">' + IC.lapiz + "</button>" +
+        '<button class="f-navbtn" onclick="ui.borrandoItem={sec:\'' + sec + "',id:'" + item.id + '\'};render()" aria-label="Borrar">' + IC.papelera + "</button></div>";
+    }
+    h += "</li>";
+  });
+  h += "</ul>";
+
+  if (ui.editor && ui.editor.sec === sec) {
+    const item = ui.editor.id ? items.find((i) => i.id === ui.editor.id) : null;
+    h += '<div class="f-subform"><div class="grid2 mb2">';
+    cfg.campos.forEach((c) => {
+      const val = item ? item[c.key] : c.tipo === "mes" ? new Date().getMonth() : c.tipo === "periodo" ? 12 : "";
+      h += '<div class="' + (c.tipo === "text" ? "span2" : "") + '"><label class="f-label">' + c.label + "</label>";
+      if (c.tipo === "mes") {
+        h += '<select id="f_' + c.key + '" class="f-input">' + MESES.map((m, i) => '<option value="' + i + '"' + (Number(val) === i ? " selected" : "") + ">" + m + "</option>").join("") + "</select>";
+      } else if (c.tipo === "periodo") {
+        h += '<select id="f_' + c.key + '" class="f-input">' + PERIODOS.map((p) => '<option value="' + p.v + '"' + (Number(val) === p.v ? " selected" : "") + ">" + p.label + "</option>").join("") + "</select>";
+      } else {
+        const mostrado = c.tipo === "importe" && item ? String(val).replace(".", ",") : esc(val);
+        h += '<input id="f_' + c.key + '" class="f-input' + (c.tipo === "importe" ? " f-mono" : "") + '" type="text" inputmode="' + (c.tipo === "importe" ? "decimal" : "text") + '" placeholder="' + (c.ph || (c.tipo === "importe" ? "0,00" : "")) + '" value="' + mostrado + '">';
+      }
+      h += "</div>";
+    });
+    h += '</div><div class="fila gap2">' +
+      '<button class="f-btn f-btn-primario f-btn-sm" style="flex:1" onclick="guardarItem(\'' + sec + '\')">' + IC.okMini + " " + (item ? "Guardar cambios" : "Añadir") + "</button>" +
+      '<button class="f-chip-mini" style="padding:8px 12px" onclick="ui.editor=null;render()">Cancelar</button></div></div>';
+  } else {
+    h += '<button class="f-link mt2" onclick="abrirEditor(\'' + sec + '\')">' + IC.mas + " Añadir</button>";
+  }
+
+  let pie = cfg.pie || "";
+  if (sec === "deudas" && C && C.totPendiente > 0) {
+    pie = 'Deuda total pendiente: <span class="f-mono negrita f-rojo">' + fmtEur(C.totPendiente) + "</span> · actualiza el saldo cuando quieras editando cada deuda.";
+  }
+  if (pie) h += '<p class="f-suave peq mt3">' + pie + "</p>";
+  h += "</section>";
+  return h;
+}
+
+function backupHTML() {
+  return '<details class="backup"><summary>Copia de seguridad y reinicio</summary>' +
+    '<div class="f-card mt2"><p class="f-suave sm mb3">Exporta tus datos a un archivo JSON o restáuralos en otro dispositivo o navegador.</p>' +
+    '<div class="fila gap2">' +
+    '<button class="f-btn f-btn-secundario f-btn-sm" onclick="exportarJSON()">' + IC.descarga + " Exportar</button>" +
+    '<button class="f-btn f-btn-secundario f-btn-sm" onclick="document.getElementById(\'impFile\').click()">Importar…</button>' +
+    '<input id="impFile" type="file" accept="application/json" hidden onchange="importarJSON(this)"></div>' +
+    '<div class="f-sep" style="margin-top:12px;padding-top:12px">' +
+    (ui.confirmReset
+      ? '<p class="sm negrita mb2 f-rojo">¿Seguro? Se borra TODO: movimientos, plan fijo, hucha y renta. Exporta antes si quieres conservarlo.</p>' +
+        '<div class="fila gap2"><button class="f-btn f-btn-sm" style="background:#B0442F;color:#fff" onclick="resetTotal()">Sí, borrar todo</button>' +
+        '<button class="f-chip-mini" style="padding:8px 12px" onclick="ui.confirmReset=false;render()">Cancelar</button></div>'
+      : '<button class="f-link f-rojo" onclick="ui.confirmReset=true;render()">' + IC.papelera + " Borrar todos los datos (empezar de cero)</button>") +
+    "</div></div></details>";
+}
+
+async function resetTotal() {
+  data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  const hoy = new Date();
+  ui = { ...ui, tab: "resumen", y: hoy.getFullYear(), m: hoy.getMonth(), formTipo: null, formCat: "",
+    editor: null, borrandoItem: null, borrandoMov: null, editandoPct: false, rentaAño: null,
+    movAbierto: false, confirmReset: false, editandoSaldo: false };
+  await persist();
+  render();
+}
+
+// ── Acciones ────────────────────────────────────────────────────────
+function setTab(t) { ui.tab = t; ui.editor = null; ui.borrandoItem = null; ui.borrandoMov = null; render(); }
+function cambiarMes(d) { const x = new Date(ui.y, ui.m + d, 1); ui.y = x.getFullYear(); ui.m = x.getMonth(); ui.borrandoMov = null; render(); }
+function abrirForm(t) { ui.formTipo = t; ui.formCat = ""; render(); const el = document.getElementById(t === "nomina" ? "nBruto" : "mImporte"); if (el) el.focus(); }
+function cerrarForm() { ui.formTipo = null; render(); }
+function setNominaTipo(t) { ui.nominaTipo = t; render(); const el = document.getElementById("nBruto"); if (el) el.focus(); }
+function selCat(btn) {
+  ui.formCat = btn.dataset.cat;
+  document.querySelectorAll("[data-cat]").forEach((b) => b.classList.toggle("f-chip-activo", b.dataset.cat === ui.formCat));
+}
+function guardarMovimiento() {
+  const imp = parseNum(document.getElementById("mImporte").value);
+  const fecha = document.getElementById("mFecha").value;
+  const nota = document.getElementById("mNota").value.trim();
+  if (imp <= 0) { document.getElementById("mImporte").classList.add("f-input-error"); return; }
+  if (!ui.formCat || !fecha) return;
+  data.transactions.push({ id: uid(), type: ui.formTipo, amount: Math.round(imp * 100) / 100, category: ui.formCat, date: fecha, note: nota });
+  persist();
+  ui.formTipo = null;
+  const [y, m] = fecha.split("-").map(Number);
+  ui.y = y; ui.m = m - 1;
+  render();
+}
+// ── Nómina ──
+function formNominaHTML() {
+  const esParo = ui.nominaTipo === "paro";
+  const cat = esParo ? "Paro" : "Nómina";
+  const ult = data.transactions.filter((t) => t.bruto != null && t.category === cat).sort((a, b) => a.date.localeCompare(b.date)).pop();
+  const sindDef = ult && ult.sindical != null ? ult.sindical : 15.7;
+  const irpfDef = ult ? (ult.irpfPct != null ? ult.irpfPct : (ult.bruto > 0 ? Math.round(((ult.irpf || 0) / ult.bruto) * 10000) / 100 : "")) : (esParo ? 0 : "");
+  return '<section class="f-card mb5">' +
+    '<div class="fila entre mb3"><h2 class="f-titulo-card">' + (esParo ? "Prestación de paro" : "Nómina del mes") + "</h2>" +
+    '<button class="f-navbtn" onclick="cerrarForm()" aria-label="Cerrar">' + IC.x + "</button></div>" +
+    '<div class="chips mb3">' +
+    '<button class="f-chip' + (!esParo ? " f-chip-activo" : "") + '" onclick="setNominaTipo(\'nomina\')">Nómina</button>' +
+    '<button class="f-chip' + (esParo ? " f-chip-activo" : "") + '" onclick="setNominaTipo(\'paro\')">Paro (SEPE)</button></div>' +
+    '<div class="grid2 mb3">' +
+    '<div><label class="f-label">Bruto €</label><input id="nBruto" class="f-input f-mono" type="text" inputmode="decimal" placeholder="0,00" oninput="recalcNeto()" autofocus></div>' +
+    '<div><label class="f-label">IRPF %</label><input id="nIrpf" class="f-input f-mono" type="text" inputmode="decimal" placeholder="' + (esParo ? "0" : "2,00") + '" value="' + String(irpfDef).replace(".", ",") + '" oninput="recalcNeto()"><p class="f-suave peq mt1 f-mono" id="nIrpfEur"></p></div>' +
+    '<div><label class="f-label">' + (esParo ? "Cotización descontada €" : "Seg. Social €") + ' <span style="text-transform:none">(suma con +)</span></label><input id="nSS" class="f-input f-mono" type="text" placeholder="' + (esParo ? "0,00" : "87,73+28,04+1,81") + '" oninput="recalcNeto()"><p class="f-suave peq mt1 f-mono" id="nSSEur"></p></div>' +
+    (esParo ? "" : '<div><label class="f-label">Cuota sindical €</label><input id="nSindical" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(sindDef).replace(".", ",") + '" oninput="recalcNeto()"></div>') +
+    '<div><label class="f-label">Neto €</label><input id="nNeto" class="f-input f-mono" type="text" inputmode="decimal" placeholder="0,00"></div>' +
+    '<div><label class="f-label">Fecha</label><input id="nFecha" class="f-input" type="date" value="' + hoyISO() + '"></div>' +
+    '<div class="span2"><label class="f-label">Nota (opcional)</label><input id="nNota" class="f-input" type="text" placeholder="' + (esParo ? "Prestación marzo…" : "Paga extra…") + '"></div>' +
+    "</div>" +
+    '<button class="f-btn f-btn-primario" onclick="guardarNomina()">' + IC.ok + " Guardar " + (esParo ? "paro" : "nómina") + "</button>" +
+    '<p class="f-suave peq mt3">' + (esParo
+      ? "El paro tributa como rendimiento del trabajo, igual que la nómina, y se suma al cálculo de la pestaña Renta. El SEPE suele retener un 0% de IRPF: por eso con dos pagadores la renta acostumbra a salir a pagar. La cotización que te descuentan es deducible (vacía = estimación del 4,7%)."
+      : "IRPF en %, tal como sale en tu nómina: el importe en € se calcula solo. En Seg. Social puedes escribir la suma de contingencias comunes + desempleo/atur + formación (ej. 87,73+28,04+1,81); si la dejas vacía se estima un 6,5% del bruto, que se desvía unos euros en meses con paga extra. Bruto, IRPF, SS y sindical alimentan la pestaña Renta.") + "</p></section>";
+}
+function recalcNeto() {
+  const b = parseNum(document.getElementById("nBruto").value);
+  const pct = parseNum(document.getElementById("nIrpf").value);
+  const irpfEur = Math.round(b * pct) / 100;
+  const sRaw = document.getElementById("nSS").value.trim();
+  const tasaEst = ui.nominaTipo === "paro" ? SS_EST_PARO : SS_EST;
+  const s = sRaw ? Math.round(parseSuma(sRaw) * 100) / 100 : Math.round(b * tasaEst * 100) / 100;
+  const sindEl = document.getElementById("nSindical");
+  const sind = sindEl ? parseNum(sindEl.value) : 0;
+  document.getElementById("nIrpfEur").textContent = b > 0 ? "= " + fmtEur(irpfEur) : "";
+  document.getElementById("nSSEur").textContent = sRaw ? "= " + fmtEur(s) : (b > 0 ? "estimada: " + fmtEur(s) : "");
+  const neto = Math.max(b - irpfEur - s - sind, 0);
+  document.getElementById("nNeto").value = neto ? String(Math.round(neto * 100) / 100).replace(".", ",") : "";
+}
+function guardarNomina() {
+  const bruto = parseNum(document.getElementById("nBruto").value);
+  const irpfPct = parseNum(document.getElementById("nIrpf").value);
+  const irpf = Math.round(bruto * irpfPct) / 100;
+  const ssRaw = document.getElementById("nSS").value.trim();
+  const neto = parseNum(document.getElementById("nNeto").value);
+  const fecha = document.getElementById("nFecha").value;
+  const nota = document.getElementById("nNota").value.trim();
+  if (bruto <= 0) { document.getElementById("nBruto").classList.add("f-input-error"); return; }
+  if (neto <= 0) { document.getElementById("nNeto").classList.add("f-input-error"); return; }
+  if (!fecha) return;
+  const sindEl = document.getElementById("nSindical");
+  data.transactions.push({
+    id: uid(), type: "ingreso", amount: Math.round(neto * 100) / 100,
+    category: ui.nominaTipo === "paro" ? "Paro" : "Nómina",
+    date: fecha, note: nota,
+    bruto: Math.round(bruto * 100) / 100, irpf: irpf, irpfPct: Math.round(irpfPct * 100) / 100,
+    ss: ssRaw ? Math.round(parseSuma(ssRaw) * 100) / 100 : null,
+    sindical: sindEl ? Math.round(parseNum(sindEl.value) * 100) / 100 : 0,
+  });
+  persist();
+  ui.formTipo = null;
+  const [y, m] = fecha.split("-").map(Number);
+  ui.y = y; ui.m = m - 1;
+  render();
+}
+
+function borrarMov(id) { data.transactions = data.transactions.filter((t) => t.id !== id); ui.borrandoMov = null; persist(); render(); }
+
+function editarPct() { ui.editandoPct = true; render(); const el = document.getElementById("pctInput"); if (el) { el.focus(); el.select(); } }
+function guardarPct() {
+  const p = Math.max(0, Math.min(100, parseNum(document.getElementById("pctInput").value)));
+  if ((data.config.objetivoModo || "ingresos") === "excedente") data.config.objetivoPctExc = p;
+  else data.config.objetivoPct = p;
+  ui.editandoPct = false; persist(); render();
+}
+function editarSaldo() {
+  ui.editandoSaldo = true;
+  render();
+  const e = document.getElementById("saldoInput");
+  if (e) { e.focus(); e.select(); }
+}
+function guardarSaldo() {
+  const v = parseNum(document.getElementById("saldoInput").value);
+  data.config.saldoAhorro = { importe: Math.round(v * 100) / 100, fecha: hoyISO() };
+  ui.editandoSaldo = false;
+  persist(); render();
+}
+function setModoObjetivo(m) {
+  data.config.objetivoModo = m;
+  if (m === "excedente" && data.config.objetivoPctExc == null) data.config.objetivoPctExc = 50;
+  ui.editandoPct = false;
+  persist(); render();
+}
+
+function abrirEditor(sec, id) { ui.editor = { sec, id: id || null }; ui.borrandoItem = null; render(); }
+function guardarItem(sec) {
+  const cfg = SECCIONES[sec];
+  const obj = { id: ui.editor.id || uid() };
+  for (const c of cfg.campos) {
+    const v = document.getElementById("f_" + c.key).value;
+    obj[c.key] = c.tipo === "importe" ? Math.round(parseNum(v) * 100) / 100 : c.tipo === "mes" || c.tipo === "periodo" ? Number(v) : String(v).trim();
+  }
+  if (!obj[cfg.campos[0].key]) { document.getElementById("f_" + cfg.campos[0].key).classList.add("f-input-error"); return; }
+  if (!cfg.ceroOk && obj[cfg.importeKey] <= 0) { document.getElementById("f_" + cfg.importeKey).classList.add("f-input-error"); return; }
+  data[sec] = ui.editor.id ? data[sec].map((i) => (i.id === ui.editor.id ? obj : i)) : [...data[sec], obj];
+  ui.editor = null; persist(); render();
+}
+function borrarItem(sec, id) { data[sec] = data[sec].filter((i) => i.id !== id); ui.borrandoItem = null; persist(); render(); }
+
+function exportarCSV() {
+  const filas = [["fecha", "tipo", "categoria", "importe", "nota"]];
+  [...data.transactions].sort((a, b) => a.date.localeCompare(b.date)).forEach((t) => {
+    filas.push([t.date, t.type, t.category, String(t.amount).replace(".", ","), (t.note || "").replace(/;/g, ",")]);
+  });
+  descargar(filas.map((f) => f.join(";")).join("\n"), "movimientos.csv", "text/csv;charset=utf-8", "\ufeff");
+}
+function exportarJSON() { descargar(JSON.stringify(data, null, 2), "finanzas-backup.json", "application/json"); }
+function descargar(contenido, nombre, tipo, bom) {
+  const blob = new Blob([(bom || "") + contenido], { type: tipo });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = nombre; a.click();
+  URL.revokeObjectURL(url);
+}
+function importarJSON(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const p = JSON.parse(r.result);
+      if (!p || typeof p !== "object" || !Array.isArray(p.transactions)) throw new Error("formato");
+      data = { ...JSON.parse(JSON.stringify(DEFAULT_DATA)), ...p, config: { ...DEFAULT_DATA.config, ...(p.config || {}) } };
+      ["transactions", "ingresosFijos", "gastosFijos", "deudas", "inversiones", "anuales"].forEach((k) => { if (!Array.isArray(data[k])) data[k] = []; });
+      persist(); render();
+    } catch (e) {
+      ui.errorGuardado = false;
+      alert("El archivo no es una copia válida de esta app.");
+    }
+  };
+  r.readAsText(f);
+  inp.value = "";
+}
+
+// ── Inicio ──────────────────────────────────────────────────────────
+(async function init() {
+  try {
+    const v = await store.get(STORAGE_KEY);
+    if (v) {
+      const p = JSON.parse(v);
+      data = { ...JSON.parse(JSON.stringify(DEFAULT_DATA)), ...p, config: { ...DEFAULT_DATA.config, ...(p.config || {}) } };
+      ["transactions", "ingresosFijos", "gastosFijos", "deudas", "inversiones", "anuales"].forEach((k) => { if (!Array.isArray(data[k])) data[k] = []; });
+    }
+  } catch (e) { /* primera vez */ }
+  ui.cargando = false;
+  render();
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+</body>
+</html>
