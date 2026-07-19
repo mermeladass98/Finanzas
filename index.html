@@ -134,7 +134,8 @@ ul { padding: 0; list-style: none; }
 .f-aviso-copia { background: #FDF3E7; border-color: #EAD9B8; }
 
 /* ── Modo oscuro ── */
-body.oscuro { background: #0D1411; color: #E4EDE7; }
+body.oscuro { background: #0D1411; color: #E4EDE7; color-scheme: dark; }
+.oscuro .f-btn-secundario { background: #141D18; }
 .oscuro .f-tabs { background: #18221C; }
 .oscuro .f-tab { color: #8FA79A; }
 .oscuro .f-tab-activo { background: #45E6A0; color: #0B3B2C; }
@@ -445,10 +446,22 @@ function render() {
 
 const FRASES = ["¿Le echamos un ojo a tus finanzas?", "¿Vemos cómo va el mes?", "Tu dinero te estaba esperando 😄", "Un vistazo rápido y a seguir con el día.", "Las cuentas claras y el café caliente ☕", "¿Repasamos los números un minuto?", "Hoy también se ahorra un poquito 💪"];
 const BOTONES = ["Vamos a ello 💪", "Manos a la obra 🚀", "Empezamos ✨", "Adelante 👉", "A por ello 🔥", "Dentro 🎯"];
+const FRASES_ONA = [
+  "Los mercados suben y bajan; tú siempre cotizas al alza 📈💚",
+  "Buenos días, preciosa: primero tu café, luego los números ☕",
+  "El interés compuesto es potente, pero no tanto como tu sonrisa 😊",
+  "Ahorra en lo que quieras… menos en ser tan tú ✨",
+  "Recordatorio del día: eres la mejor inversión de esta casa 💚",
+  "Hoy puedes con todo. Y lo sabes 💪",
+  "Cada euro apartado es un pasito más de vuestros planes juntos 🏡",
+  "Guapa, lista y ahorradora: el pack completo 😄",
+];
 function splashHTML() {
   const hoy = new Date(), hh = hoy.getHours();
   const saludo = hh < 7 ? "Buenas noches" : hh < 13 ? "Buenos días" : hh < 21 ? "Buenas tardes" : "Buenas noches";
-  const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+  const esOna = (data.config.nombre || "").trim().toLowerCase() === "ona";
+  const pool = esOna ? FRASES_ONA : FRASES;
+  const frase = pool[Math.floor(Math.random() * pool.length)];
   const boton = BOTONES[Math.floor(Math.random() * BOTONES.length)];
   if (!data.config.nombre) {
     return '<div class="contenedor fila centro" style="min-height:92vh"><section class="f-hero" style="width:100%"><span class="f-marca">€</span>' +
@@ -460,7 +473,7 @@ function splashHTML() {
       '<button class="f-btn f-btn-sm mt3" style="background:#45E6A0;color:#0B3B2C;width:100%;font-weight:700;margin-top:14px" onclick="guardarNombre()">Empezar ✨</button></section></div>';
   }
   return '<div class="contenedor fila centro" style="min-height:92vh"><section class="f-hero centrado" style="width:100%"><span class="f-marca">€</span>' +
-    '<p style="font-size:2.6rem">💚</p>' +
+    '<p style="font-size:2.6rem">' + (esOna ? "💖" : "💚") + "</p>" +
     '<p style="font-size:1.5rem;font-weight:700">' + saludo + ", " + esc(data.config.nombre) + " 👋</p>" +
     '<p class="f-tasa mt2" style="font-size:0.95rem">' + frase + "</p>" +
     '<button class="f-btn f-btn-sm mt4" style="background:#45E6A0;color:#0B3B2C;width:100%;font-weight:700;margin-top:18px" onclick="entrarApp()">' + boton + "</button></section></div>";
@@ -965,14 +978,19 @@ function carteraHTML(idx, c) {
   } else {
     acciones = '<button class="f-navbtn" onclick="ui.invBorrando=\'' + c.id + '\';render()" aria-label="Borrar fondo">' + IC.papelera + "</button>";
   }
-  return '<section class="f-card mb4" style="border-left:4px solid #2CB57E"><div class="fila entre mb2"><h2 class="f-titulo-card">' + esc(c.nombre) + "</h2>" + acciones + "</div>" +
+  const per = c.personas || 2;
+  return '<section class="f-card mb4" style="border-left:4px solid #2CB57E"><div class="fila entre mb2"><h2 class="f-titulo-card">' + esc(c.nombre) + (c.alias ? ' <span class="f-suave" style="font-weight:400">· ' + esc(c.alias) + "</span>" : "") + "</h2>" + acciones + "</div>" +
     '<div class="grid2 mb2">' +
+    '<div class="span2"><label class="f-label">Nombre identificativo <span style="text-transform:none">(opcional)</span></label><input id="c' + idx + 'Nom" class="f-input" type="text" placeholder="MyInvestor, cuenta conjunta, para el niño…" value="' + esc(c.alias || "") + '" onchange="guardarInv();render()"></div>' +
     '<div><label class="f-label">Ya invertido €</label><input id="c' + idx + 'Ini" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(c.inicial).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
     '<div><label class="f-label">Aportación € / mes</label><input id="c' + idx + 'Men" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(c.mensual).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
     '<div><label class="f-label">Rentab. anual %</label><input id="c' + idx + 'Pct" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(c.pct).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
-    '<div style="align-self:end"><p class="f-suave peq">Al final del horizonte</p><p class="f-mono negrita f-verde" id="c' + idx + 'Res">—</p></div>' +
+    '<div><label class="f-label">Años <span style="text-transform:none">(vacío = general)</span></label><input id="c' + idx + 'Anios" class="f-input f-mono" type="text" inputmode="numeric" placeholder="—" value="' + (c.anios ? c.anios : "") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
     "</div>" +
-    '<label class="fila gap2 sm"><input id="c' + idx + 'Par" type="checkbox"' + (c.pareja ? " checked" : "") + ' onchange="recalcInv();guardarInv()"> 👥 Lo aportamos en pareja (a medias)</label></section>';
+    '<div class="fila entre gap2" style="flex-wrap:wrap"><label class="fila gap2 sm"><input id="c' + idx + 'Par" type="checkbox"' + (c.pareja ? " checked" : "") + ' onchange="recalcInv();guardarInv()"> 👥 Lo aportamos en pareja (a medias)</label>' +
+    '<span class="fila gap1 sm f-suave">entre <select id="c' + idx + 'Per" class="f-input" style="width:60px;padding:4px 8px" onchange="recalcInv();guardarInv()">' +
+    [2, 3, 4, 5, 6].map((n) => '<option value="' + n + '"' + (per === n ? " selected" : "") + ">" + n + "</option>").join("") + "</select> personas</span></div>" +
+    '<p class="f-suave peq mt2">Al final de su horizonte (<span id="c' + idx + 'A">—</span> años): <span class="f-mono negrita f-verde" id="c' + idx + 'Res">—</span></p></section>';
 }
 function tabInversion() {
   const v = invCfg();
@@ -981,7 +999,7 @@ function tabInversion() {
     '<p class="f-tasa mt1" id="rSub"></p>' +
     '<div class="f-desglose" id="rDesglose"></div></section>';
 
-  h += '<section class="f-card mb4"><div class="fila entre"><h2 class="f-titulo-card">⏳ Horizonte</h2>' +
+  h += '<section class="f-card mb4"><div class="fila entre"><h2 class="f-titulo-card">⏳ Horizonte general</h2>' +
     '<div class="fila gap2"><input id="iAnios" class="f-input f-mono" style="width:72px;text-align:center" type="text" inputmode="numeric" value="' + v.anios + '" oninput="recalcInv()" onchange="guardarInv()"><span class="sm f-suave">años</span></div></div></section>';
 
   v.carteras.forEach((c, idx) => { h += carteraHTML(idx, c); });
@@ -995,35 +1013,45 @@ function tabInversion() {
     h += '<button class="f-btn f-btn-secundario mb4" onclick="guardarInv();ui.invAdd=true;render()">' + IC.mas + " Añadir otro fondo</button>";
   }
 
-  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🔮 Todos los fondos sumados</h2><div id="invHitos"></div></section>';
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🔮 Todos los fondos sumados <span class="f-suave" style="font-weight:400">(al horizonte general)</span></h2><div id="invHitos"></div></section>';
 
   h += '<p class="f-suave peq">Los % son medias históricas a muy largo plazo de cada índice (con dividendos, antes de inflación y comisiones). Ningún fondo hace ese porcentaje «cada año»: habrá años de +25% y años de −35%; la media aparece aguantando décadas sin vender. Orientación, no asesoramiento.</p>';
   return h;
 }
 function leerCarteras() {
-  return invCfg().carteras.map((c, idx) => ({
-    id: c.id, nombre: c.nombre,
-    inicial: parseNum(document.getElementById("c" + idx + "Ini").value),
-    mensual: parseNum(document.getElementById("c" + idx + "Men").value),
-    pct: parseNum(document.getElementById("c" + idx + "Pct").value),
-    pareja: document.getElementById("c" + idx + "Par").checked,
-  }));
+  return invCfg().carteras.map((c, idx) => {
+    const a = parseNum(document.getElementById("c" + idx + "Anios").value);
+    return {
+      id: c.id, nombre: c.nombre,
+      alias: document.getElementById("c" + idx + "Nom").value.trim(),
+      inicial: parseNum(document.getElementById("c" + idx + "Ini").value),
+      mensual: parseNum(document.getElementById("c" + idx + "Men").value),
+      pct: parseNum(document.getElementById("c" + idx + "Pct").value),
+      anios: a > 0 ? a : null,
+      pareja: document.getElementById("c" + idx + "Par").checked,
+      personas: Number(document.getElementById("c" + idx + "Per").value) || 2,
+    };
+  });
 }
 function recalcInv() {
-  const anios = Math.max(parseNum(document.getElementById("iAnios").value), 1);
+  const g = Math.max(parseNum(document.getElementById("iAnios").value), 1);
   const cs = leerCarteras();
-  let total = 0, tuParte = 0, tuAportado = 0, algunaPareja = false, lineas = "";
+  let total = 0, tuParte = 0, tuAportado = 0, algunaPareja = false, algunOtro = false, lineas = "";
   cs.forEach((c, idx) => {
-    const r = fvInversion(c.inicial, c.mensual, c.pct, anios);
+    const ef = c.anios || g;
+    if (c.anios) algunOtro = true;
+    const r = fvInversion(c.inicial, c.mensual, c.pct, ef);
+    const div = c.pareja ? c.personas || 2 : 1;
     total += r.fv;
-    tuParte += c.pareja ? r.fv / 2 : r.fv;
-    tuAportado += c.pareja ? r.aportado / 2 : r.aportado;
+    tuParte += r.fv / div;
+    tuAportado += r.aportado / div;
     if (c.pareja) algunaPareja = true;
-    document.getElementById("c" + idx + "Res").textContent = fmtEur(r.fv) + " (+" + fmtEur(Math.max(r.fv - r.aportado, 0)) + ")" + (c.pareja ? " · tuya: " + fmtEur(r.fv / 2) : "");
-    lineas += '<div class="f-linea"><span class="f-eyebrow-claro">' + esc(c.nombre) + (c.pareja ? " 👥" : "") + '</span><span class="f-mono">' + fmtEur(r.fv) + "</span></div>";
+    document.getElementById("c" + idx + "A").textContent = ef;
+    document.getElementById("c" + idx + "Res").textContent = fmtEur(r.fv) + " (+" + fmtEur(Math.max(r.fv - r.aportado, 0)) + ")" + (c.pareja ? " · tuya: " + fmtEur(r.fv / div) : "");
+    lineas += '<div class="f-linea"><span class="f-eyebrow-claro">' + esc(c.nombre) + (c.alias ? " · " + esc(c.alias) : "") + (c.pareja ? " 👥÷" + div : "") + '</span><span class="f-mono">' + fmtEur(r.fv) + "</span></div>";
   });
   document.getElementById("rFuturo").textContent = fmtEur(total);
-  document.getElementById("rSub").textContent = "en " + anios + " años · valor total de los fondos";
+  document.getElementById("rSub").textContent = "valor total de los fondos" + (algunOtro ? " · cada uno a su horizonte" : " · en " + g + " años");
   lineas += '<div class="f-linea"><span class="f-eyebrow-claro">Tu bolsillo habrá puesto</span><span class="f-mono">' + fmtEur(tuAportado) + "</span></div>";
   if (algunaPareja) lineas += '<div class="f-linea"><span class="f-eyebrow-claro">👥 Tu parte del total</span><span class="f-mono f-mint">' + fmtEur(tuParte) + "</span></div>";
   lineas += '<div class="f-linea"><span class="f-eyebrow-claro">Ganancia' + (algunaPareja ? " (tu parte)" : "") + '</span><span class="f-mono f-mint">+' + fmtEur(Math.max(tuParte - tuAportado, 0)) + "</span></div>";
@@ -1042,7 +1070,7 @@ function guardarInv() {
 }
 function addFondo(i) {
   const p = PRESETS_FONDOS[i];
-  invCfg().carteras.push({ id: uid(), nombre: p.nombre, pct: p.pct, inicial: 0, mensual: 0, pareja: false });
+  invCfg().carteras.push({ id: uid(), nombre: p.nombre, alias: "", pct: p.pct, inicial: 0, mensual: 0, anios: null, pareja: false, personas: 2 });
   ui.invAdd = false;
   persist(); render();
 }
