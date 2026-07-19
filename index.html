@@ -849,7 +849,7 @@ function tabRenta() {
   const tieneParo = R.noms.some((t) => t.category === "Paro");
   const tieneNomina = R.noms.some((t) => t.category !== "Paro");
   if (tieneParo) {
-    h += '<div class="f-card mb4" style="background:#FDF3E7;border-color:#EAD9B8"><p class="sm">' +
+    h += '<div class="f-card f-aviso-copia mb4"><p class="sm">' +
       (tieneNomina ? "Este año tienes <span class='negrita'>dos pagadores</span> (empresa + SEPE). " : "") +
       "Quien cobra paro está obligado a presentar la declaración desde 2024. Como cada pagador retiene como si fuera el único, es habitual que salga a pagar: este cálculo ya lo refleja al sumarlo todo.</p></div>";
   }
@@ -987,9 +987,9 @@ function carteraHTML(idx, c) {
     '<div><label class="f-label">Rentab. anual %</label><input id="c' + idx + 'Pct" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(c.pct).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
     '<div><label class="f-label">Años <span style="text-transform:none">(vacío = general)</span></label><input id="c' + idx + 'Anios" class="f-input f-mono" type="text" inputmode="numeric" placeholder="—" value="' + (c.anios ? c.anios : "") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
     "</div>" +
-    '<div class="fila entre gap2" style="flex-wrap:wrap"><label class="fila gap2 sm"><input id="c' + idx + 'Par" type="checkbox"' + (c.pareja ? " checked" : "") + ' onchange="recalcInv();guardarInv()"> 👥 Lo aportamos en pareja (a medias)</label>' +
-    '<span class="fila gap1 sm f-suave">entre <select id="c' + idx + 'Per" class="f-input" style="width:60px;padding:4px 8px" onchange="recalcInv();guardarInv()">' +
-    [2, 3, 4, 5, 6].map((n) => '<option value="' + n + '"' + (per === n ? " selected" : "") + ">" + n + "</option>").join("") + "</select> personas</span></div>" +
+    '<div class="fila gap2 sm" style="flex-wrap:wrap"><label class="fila gap2 sm"><input id="c' + idx + 'Par" type="checkbox"' + (c.pareja ? " checked" : "") + ' onchange="recalcInv();guardarInv()"> 👥 Compartido entre</label>' +
+    '<select id="c' + idx + 'Per" class="f-input" style="width:60px;padding:4px 8px" onchange="recalcInv();guardarInv()">' +
+    [2, 3, 4, 5, 6].map((n) => '<option value="' + n + '"' + (per === n ? " selected" : "") + ">" + n + "</option>").join("") + '</select><span class="sm f-suave">personas</span></div>' +
     '<p class="f-suave peq mt2">Al final de su horizonte (<span id="c' + idx + 'A">—</span> años): <span class="f-mono negrita f-verde" id="c' + idx + 'Res">—</span></p></section>';
 }
 function tabInversion() {
