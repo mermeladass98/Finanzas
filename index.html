@@ -21,7 +21,7 @@ input, select { font: inherit; }
 h1, h2, p, ul { margin: 0; }
 ul { padding: 0; list-style: none; }
 
-.contenedor { max-width: 430px; margin: 0 auto; padding: 20px 16px 64px; }
+.contenedor { max-width: 430px; margin: 0 auto; padding: calc(20px + env(safe-area-inset-top)) 16px calc(64px + env(safe-area-inset-bottom)); }
 .fila { display: flex; align-items: center; }
 .entre { justify-content: space-between; }
 .centro { justify-content: center; }
@@ -268,6 +268,8 @@ let ui = {
   editandoSaldo: false,
   splash: true,
   subMes: "dia",
+  invAdd: false,
+  invBorrando: null,
 };
 
 async function persist() {
@@ -913,29 +915,42 @@ function guardarConfigRenta() {
 }
 
 // ── Pestaña Mi inversión ──
+const PRESETS_FONDOS = [
+  { nombre: "🇺🇸 S&P 500", pct: 10 },
+  { nombre: "🌍 Todo el mundo (All-World)", pct: 8 },
+  { nombre: "🌐 MSCI World (desarrollados)", pct: 9 },
+  { nombre: "🇪🇺 Europa (Stoxx 600)", pct: 7 },
+  { nombre: "📈 Nasdaq-100 (más volátil)", pct: 12 },
+  { nombre: "🌏 Emergentes (más volátil)", pct: 7 },
+  { nombre: "✏️ Otro fondo", pct: 7 },
+];
 function invCfg() {
   const c = data.config.inversion || {};
+  if (Array.isArray(c.carteras)) {
+    if (c.anios == null) c.anios = 15;
+    return c;
+  }
   const nom = (i) => (i.nombre || "").toLowerCase();
   const planSp = data.inversiones.filter((i) => /s ?& ?p|sp ?500|500/.test(nom(i))).reduce((s, i) => s + i.importe, 0);
   const planMu = data.inversiones.filter((i) => /mund|world|global/.test(nom(i))).reduce((s, i) => s + i.importe, 0);
   const planTot = data.inversiones.reduce((s, i) => s + i.importe, 0);
-  const viejo = c.carteras ? null : c; // migración del formato antiguo (una sola cartera)
-  const sp = (c.carteras && c.carteras.sp) || {};
-  const mu = (c.carteras && c.carteras.mundo) || {};
-  return {
-    anios: c.anios != null ? c.anios : viejo && viejo.anios != null ? viejo.anios : 15,
-    sp: {
-      inicial: sp.inicial != null ? sp.inicial : viejo && viejo.inicial != null ? viejo.inicial : 0,
-      mensual: sp.mensual != null ? sp.mensual : viejo && viejo.mensual != null ? viejo.mensual : planSp || planTot,
-      pct: sp.pct != null ? sp.pct : viejo && viejo.pct != null ? viejo.pct : 10,
-    },
-    mundo: {
-      inicial: mu.inicial != null ? mu.inicial : 0,
-      mensual: mu.mensual != null ? mu.mensual : planMu,
-      pct: mu.pct != null ? mu.pct : 8,
-    },
-    planSp, planMu,
-  };
+  let carteras;
+  if (c.carteras && (c.carteras.sp || c.carteras.mundo)) {
+    const sp = c.carteras.sp || {}, mu = c.carteras.mundo || {};
+    carteras = [
+      { id: uid(), nombre: "🇺🇸 S&P 500", pct: sp.pct != null ? sp.pct : 10, inicial: sp.inicial || 0, mensual: sp.mensual != null ? sp.mensual : planSp || planTot, pareja: false },
+      { id: uid(), nombre: "🌍 Todo el mundo (All-World)", pct: mu.pct != null ? mu.pct : 8, inicial: mu.inicial || 0, mensual: mu.mensual != null ? mu.mensual : planMu, pareja: false },
+    ];
+  } else if (c.inicial != null || c.mensual != null || c.pct != null) {
+    carteras = [{ id: uid(), nombre: "🇺🇸 S&P 500", pct: c.pct != null ? c.pct : 10, inicial: c.inicial || 0, mensual: c.mensual != null ? c.mensual : planTot, pareja: false }];
+  } else {
+    carteras = [
+      { id: uid(), nombre: "🇺🇸 S&P 500", pct: 10, inicial: 0, mensual: planSp || planTot, pareja: false },
+      { id: uid(), nombre: "🌍 Todo el mundo (All-World)", pct: 8, inicial: 0, mensual: planMu, pareja: false },
+    ];
+  }
+  data.config.inversion = { anios: c.anios != null ? c.anios : 15, carteras };
+  return data.config.inversion;
 }
 function fvInversion(inicial, mensual, pct, anios) {
   const m = Math.max(Math.round(anios * 12), 1);
@@ -943,71 +958,100 @@ function fvInversion(inicial, mensual, pct, anios) {
   const fv = rm === 0 ? inicial + mensual * m : inicial * Math.pow(1 + rm, m) + mensual * ((Math.pow(1 + rm, m) - 1) / rm);
   return { fv, aportado: inicial + mensual * m };
 }
-function carteraHTML(pref, titulo, v, plan, nota) {
-  return '<section class="f-card mb4" style="border-left:4px solid #2CB57E"><h2 class="f-titulo-card mb2">' + titulo + '</h2><div class="grid2 mb2">' +
-    '<div><label class="f-label">Ya invertido €</label><input id="' + pref + 'Ini" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(v.inicial).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
-    '<div><label class="f-label">Aportación € / mes</label><input id="' + pref + 'Men" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(v.mensual).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
-    '<div><label class="f-label">Rentab. anual % <span style="text-transform:none">(' + nota + ')</span></label><input id="' + pref + 'Pct" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(v.pct).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
-    '<div style="align-self:end"><p class="f-suave peq">Dentro de <span id="' + pref + 'A">—</span> años</p><p class="f-mono negrita f-verde" id="' + pref + 'Res">—</p></div>' +
-    "</div>" + (plan > 0 ? '<p class="f-suave peq">Tu Plan fijo ya aporta ' + fmtEur(plan) + "/mes a esta cartera: la casilla viene precargada con eso.</p>" : "") + "</section>";
+function carteraHTML(idx, c) {
+  let acciones;
+  if (ui.invBorrando === c.id) {
+    acciones = '<div class="fila gap1"><button class="f-btn-borrar-conf" onclick="borrarFondo(\'' + c.id + '\')">Borrar</button><button class="f-chip-mini" onclick="ui.invBorrando=null;render()">No</button></div>';
+  } else {
+    acciones = '<button class="f-navbtn" onclick="ui.invBorrando=\'' + c.id + '\';render()" aria-label="Borrar fondo">' + IC.papelera + "</button>";
+  }
+  return '<section class="f-card mb4" style="border-left:4px solid #2CB57E"><div class="fila entre mb2"><h2 class="f-titulo-card">' + esc(c.nombre) + "</h2>" + acciones + "</div>" +
+    '<div class="grid2 mb2">' +
+    '<div><label class="f-label">Ya invertido €</label><input id="c' + idx + 'Ini" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(c.inicial).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
+    '<div><label class="f-label">Aportación € / mes</label><input id="c' + idx + 'Men" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(c.mensual).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
+    '<div><label class="f-label">Rentab. anual %</label><input id="c' + idx + 'Pct" class="f-input f-mono" type="text" inputmode="decimal" value="' + String(c.pct).replace(".", ",") + '" oninput="recalcInv()" onchange="guardarInv()"></div>' +
+    '<div style="align-self:end"><p class="f-suave peq">Al final del horizonte</p><p class="f-mono negrita f-verde" id="c' + idx + 'Res">—</p></div>' +
+    "</div>" +
+    '<label class="fila gap2 sm"><input id="c' + idx + 'Par" type="checkbox"' + (c.pareja ? " checked" : "") + ' onchange="recalcInv();guardarInv()"> 👥 Lo aportamos en pareja (a medias)</label></section>';
 }
 function tabInversion() {
   const v = invCfg();
-  let h = '<section class="f-hero mb4"><span class="f-marca" style="opacity:.16">📈</span><p class="f-eyebrow-claro mb2">📈 Mi inversión · las dos carteras juntas</p>' +
+  let h = '<section class="f-hero mb4"><span class="f-marca" style="opacity:.16">📈</span><p class="f-eyebrow-claro mb2">📈 Mi inversión · todos los fondos</p>' +
     '<span class="f-mono f-cifra f-mint" id="rFuturo">—</span>' +
     '<p class="f-tasa mt1" id="rSub"></p>' +
-    '<div class="f-desglose">' +
-    '<div class="f-linea"><span class="f-eyebrow-claro">🇺🇸 S&amp;P 500</span><span class="f-mono" id="rSp">—</span></div>' +
-    '<div class="f-linea"><span class="f-eyebrow-claro">🌍 Todo el mundo</span><span class="f-mono" id="rMu">—</span></div>' +
-    '<div class="f-linea"><span class="f-eyebrow-claro">Tú habrás puesto</span><span class="f-mono" id="rAportado">—</span></div>' +
-    '<div class="f-linea"><span class="f-eyebrow-claro">Ganancia estimada</span><span class="f-mono f-mint" id="rGanancia">—</span></div>' +
-    "</div></section>";
+    '<div class="f-desglose" id="rDesglose"></div></section>';
 
   h += '<section class="f-card mb4"><div class="fila entre"><h2 class="f-titulo-card">⏳ Horizonte</h2>' +
     '<div class="fila gap2"><input id="iAnios" class="f-input f-mono" style="width:72px;text-align:center" type="text" inputmode="numeric" value="' + v.anios + '" oninput="recalcInv()" onchange="guardarInv()"><span class="sm f-suave">años</span></div></div></section>';
 
-  h += carteraHTML("sp", "🇺🇸 Fondo indexado S&amp;P 500", v.sp, v.planSp, "media hist. ~10");
-  h += carteraHTML("mu", "🌍 Fondo indexado Todo el mundo", v.mundo, v.planMu, "media hist. ~8");
+  v.carteras.forEach((c, idx) => { h += carteraHTML(idx, c); });
+  if (!v.carteras.length) h += '<p class="f-suave sm centrado mb4">Sin fondos todavía: añade el primero 👇</p>';
 
-  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🔮 Las dos carteras sumadas</h2><div id="invHitos"></div></section>';
+  if (ui.invAdd) {
+    h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">Elige un fondo</h2><div class="chips">' +
+      PRESETS_FONDOS.map((p, i) => '<button class="f-chip" onclick="addFondo(' + i + ')">' + p.nombre + " · ~" + p.pct + "%</button>").join("") +
+      '</div><button class="f-chip-mini mt3" style="padding:8px 12px" onclick="ui.invAdd=false;render()">Cancelar</button></section>';
+  } else {
+    h += '<button class="f-btn f-btn-secundario mb4" onclick="guardarInv();ui.invAdd=true;render()">' + IC.mas + " Añadir otro fondo</button>";
+  }
 
-  h += '<p class="f-suave peq">Los % por defecto son medias históricas a muy largo plazo de los índices que siguen los fondos de Vanguard (S&amp;P 500 ≈ 10 %/año; mundial tipo FTSE All-World ≈ 8 %/año, con dividendos reinvertidos, antes de inflación y comisiones). El pasado no garantiza el futuro: habrá años de caídas fuertes. Es orientación, no asesoramiento de inversión.</p>';
+  h += '<section class="f-card mb4"><h2 class="f-titulo-card mb2">🔮 Todos los fondos sumados</h2><div id="invHitos"></div></section>';
+
+  h += '<p class="f-suave peq">Los % son medias históricas a muy largo plazo de cada índice (con dividendos, antes de inflación y comisiones). Ningún fondo hace ese porcentaje «cada año»: habrá años de +25% y años de −35%; la media aparece aguantando décadas sin vender. Orientación, no asesoramiento.</p>';
   return h;
 }
-function leerCartera(pref) {
-  return {
-    inicial: parseNum(document.getElementById(pref + "Ini").value),
-    mensual: parseNum(document.getElementById(pref + "Men").value),
-    pct: parseNum(document.getElementById(pref + "Pct").value),
-  };
+function leerCarteras() {
+  return invCfg().carteras.map((c, idx) => ({
+    id: c.id, nombre: c.nombre,
+    inicial: parseNum(document.getElementById("c" + idx + "Ini").value),
+    mensual: parseNum(document.getElementById("c" + idx + "Men").value),
+    pct: parseNum(document.getElementById("c" + idx + "Pct").value),
+    pareja: document.getElementById("c" + idx + "Par").checked,
+  }));
 }
 function recalcInv() {
   const anios = Math.max(parseNum(document.getElementById("iAnios").value), 1);
-  const sp = leerCartera("sp"), mu = leerCartera("mu");
-  const rs = fvInversion(sp.inicial, sp.mensual, sp.pct, anios);
-  const rm = fvInversion(mu.inicial, mu.mensual, mu.pct, anios);
-  const fv = rs.fv + rm.fv, ap = rs.aportado + rm.aportado;
-  document.getElementById("rFuturo").textContent = fmtEur(fv);
-  document.getElementById("rSub").textContent = "en " + anios + " años, sumando S&P 500 + Todo el mundo";
-  document.getElementById("rSp").textContent = fmtEur(rs.fv);
-  document.getElementById("rMu").textContent = fmtEur(rm.fv);
-  document.getElementById("rAportado").textContent = fmtEur(ap);
-  document.getElementById("rGanancia").textContent = "+" + fmtEur(Math.max(fv - ap, 0));
-  document.getElementById("spA").textContent = anios;
-  document.getElementById("muA").textContent = anios;
-  document.getElementById("spRes").textContent = fmtEur(rs.fv) + " (+" + fmtEur(Math.max(rs.fv - rs.aportado, 0)) + ")";
-  document.getElementById("muRes").textContent = fmtEur(rm.fv) + " (+" + fmtEur(Math.max(rm.fv - rm.aportado, 0)) + ")";
+  const cs = leerCarteras();
+  let total = 0, tuParte = 0, tuAportado = 0, algunaPareja = false, lineas = "";
+  cs.forEach((c, idx) => {
+    const r = fvInversion(c.inicial, c.mensual, c.pct, anios);
+    total += r.fv;
+    tuParte += c.pareja ? r.fv / 2 : r.fv;
+    tuAportado += c.pareja ? r.aportado / 2 : r.aportado;
+    if (c.pareja) algunaPareja = true;
+    document.getElementById("c" + idx + "Res").textContent = fmtEur(r.fv) + " (+" + fmtEur(Math.max(r.fv - r.aportado, 0)) + ")" + (c.pareja ? " · tuya: " + fmtEur(r.fv / 2) : "");
+    lineas += '<div class="f-linea"><span class="f-eyebrow-claro">' + esc(c.nombre) + (c.pareja ? " 👥" : "") + '</span><span class="f-mono">' + fmtEur(r.fv) + "</span></div>";
+  });
+  document.getElementById("rFuturo").textContent = fmtEur(total);
+  document.getElementById("rSub").textContent = "en " + anios + " años · valor total de los fondos";
+  lineas += '<div class="f-linea"><span class="f-eyebrow-claro">Tu bolsillo habrá puesto</span><span class="f-mono">' + fmtEur(tuAportado) + "</span></div>";
+  if (algunaPareja) lineas += '<div class="f-linea"><span class="f-eyebrow-claro">👥 Tu parte del total</span><span class="f-mono f-mint">' + fmtEur(tuParte) + "</span></div>";
+  lineas += '<div class="f-linea"><span class="f-eyebrow-claro">Ganancia' + (algunaPareja ? " (tu parte)" : "") + '</span><span class="f-mono f-mint">+' + fmtEur(Math.max(tuParte - tuAportado, 0)) + "</span></div>";
+  document.getElementById("rDesglose").innerHTML = lineas;
   document.getElementById("invHitos").innerHTML = [5, 10, 15, 20, 25].map((a) => {
-    const t = fvInversion(sp.inicial, sp.mensual, sp.pct, a).fv + fvInversion(mu.inicial, mu.mensual, mu.pct, a).fv;
+    const t = cs.reduce((s, c) => s + fvInversion(c.inicial, c.mensual, c.pct, a).fv, 0);
     return '<div class="fila entre sm" style="margin-top:4px"><span class="f-suave">En ' + a + ' años</span><span class="f-mono negrita">' + fmtEur(t) + "</span></div>";
   }).join("");
 }
 function guardarInv() {
   data.config.inversion = {
     anios: Math.max(parseNum(document.getElementById("iAnios").value), 1),
-    carteras: { sp: leerCartera("sp"), mundo: leerCartera("mu") },
+    carteras: leerCarteras(),
   };
   persist();
+}
+function addFondo(i) {
+  const p = PRESETS_FONDOS[i];
+  invCfg().carteras.push({ id: uid(), nombre: p.nombre, pct: p.pct, inicial: 0, mensual: 0, pareja: false });
+  ui.invAdd = false;
+  persist(); render();
+}
+function borrarFondo(id) {
+  const v = invCfg();
+  v.carteras = v.carteras.filter((c) => c.id !== id);
+  data.config.inversion = v;
+  ui.invBorrando = null;
+  persist(); render();
 }
 
 // ── Pestaña Información ──
@@ -1141,13 +1185,13 @@ async function resetTotal() {
   const hoy = new Date();
   ui = { ...ui, tab: "resumen", y: hoy.getFullYear(), m: hoy.getMonth(), formTipo: null, formCat: "",
     editor: null, borrandoItem: null, borrandoMov: null, editandoPct: false, rentaAño: null,
-    movAbierto: false, confirmReset: false, editandoSaldo: false, splash: true, subMes: "dia" };
+    movAbierto: false, confirmReset: false, editandoSaldo: false, splash: true, subMes: "dia", invAdd: false, invBorrando: null };
   await persist();
   render();
 }
 
 // ── Acciones ────────────────────────────────────────────────────────
-function setTab(t) { ui.tab = t; ui.editor = null; ui.borrandoItem = null; ui.borrandoMov = null; render(); }
+function setTab(t) { ui.tab = t; ui.editor = null; ui.borrandoItem = null; ui.borrandoMov = null; ui.invAdd = false; ui.invBorrando = null; render(); }
 function cambiarMes(d) { const x = new Date(ui.y, ui.m + d, 1); ui.y = x.getFullYear(); ui.m = x.getMonth(); ui.borrandoMov = null; render(); }
 function abrirForm(t) { ui.formTipo = t; ui.formCat = ""; render(); const el = document.getElementById(t === "nomina" ? "nBruto" : "mImporte"); if (el) el.focus(); }
 function cerrarForm() { ui.formTipo = null; render(); }
